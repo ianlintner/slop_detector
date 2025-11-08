@@ -1,8 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🔍 Slop Detector
+
+A Next.js application that analyzes content for "slop" - low-effort, repetitive, AI-generated, or spammy characteristics. Get a custom slop score that measures how likely content is to be clickbait, hiding the lede, or using dark patterns to generate quick money online.
+
+## Features
+
+- **Text Analysis**: Paste any text content directly to analyze it for slop characteristics
+- **YouTube Analysis**: Enter a YouTube URL to analyze video transcripts/captions for slop
+- **Custom Slop Score**: Get a 0-100 score based on multiple factors:
+  - **Repetitiveness**: Detects repeated words, phrases, and sentences
+  - **AI-Generated Content**: Identifies common AI writing patterns and phrases
+  - **Clickbait**: Catches clickbait headlines and excessive punctuation
+  - **Low Effort**: Detects poor structure and padding
+  - **Fluff**: Identifies excessive filler words and phrases
+- **Detailed Breakdown**: See exactly what issues were detected in the content
 
 ## Getting Started
 
-First, run the development server:
+First, install dependencies:
+
+```bash
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
@@ -16,9 +36,43 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Usage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Analyzing Text Content
+
+1. Select the "📝 Text Content" tab
+2. Paste your content into the text area
+3. Click "🔍 Analyze Content"
+4. View your slop score and detailed breakdown
+
+### Analyzing YouTube Videos
+
+1. Select the "🎥 YouTube URL" tab
+2. Enter a YouTube video URL (the video must have captions/transcripts available)
+3. Click "🔍 Analyze Content"
+4. View the slop analysis of the video's transcript
+
+## Slop Score Ratings
+
+- **0-19**: Minimal Slop - High quality content
+- **20-39**: Low Slop - Generally good content with minor issues
+- **40-59**: Moderate Slop - Noticeable quality concerns
+- **60-79**: High Slop - Significant quality issues
+- **80-100**: Extreme Slop - Very low quality, likely spam or clickbait
+
+## Technology Stack
+
+- **Next.js 16** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first styling
+- **youtube-transcript** - Fetching YouTube video transcripts
+
+## Building for Production
+
+```bash
+npm run build
+npm start
+```
 
 ## Learn More
 
@@ -34,3 +88,4 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+

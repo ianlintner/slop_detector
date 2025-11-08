@@ -120,7 +120,7 @@ function calculateRepetitiveness(words: string[], sentences: string[], details: 
   });
   
   const highRepeatWords = Array.from(wordFreq.entries())
-    .filter(([_, count]) => count > 5)
+    .filter(([, count]) => count > 5)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3);
   
@@ -138,7 +138,7 @@ function calculateRepetitiveness(words: string[], sentences: string[], details: 
     }
   });
   
-  const repeatedSentences = Array.from(sentenceFreq.entries()).filter(([_, count]) => count > 1);
+  const repeatedSentences = Array.from(sentenceFreq.entries()).filter(([, count]) => count > 1);
   if (repeatedSentences.length > 0) {
     score += 40;
     details.push(`${repeatedSentences.length} sentence(s) repeated multiple times`);
@@ -179,7 +179,6 @@ function calculateClickbaitScore(lowerContent: string, content: string, details:
   
   // Check for excessive punctuation
   const exclamationCount = (content.match(/!/g) || []).length;
-  const questionCount = (content.match(/\?/g) || []).length;
   
   if (exclamationCount > 5) {
     score += 20;
