@@ -65,7 +65,7 @@ const FILLER_PHRASES = [
 
 export function analyzeSlopContent(content: string): SlopAnalysis {
   const lowerContent = content.toLowerCase();
-  const words = content.split(/\s+/);
+  const words = content.split(/\s+/).filter(w => w.length > 0);
   const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
   
   const details: string[] = [];
