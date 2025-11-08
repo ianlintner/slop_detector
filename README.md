@@ -74,6 +74,50 @@ npm run build
 npm start
 ```
 
+## Documentation
+
+Comprehensive documentation is available in the `docs/` folder and can be viewed with MkDocs.
+
+### Viewing Documentation
+
+To view the documentation locally:
+
+1. **Install MkDocs** (one-time setup):
+   ```bash
+   pip install -r requirements.txt
+   # or
+   npm run docs:install
+   ```
+
+2. **Serve documentation locally**:
+   ```bash
+   mkdocs serve
+   # or
+   npm run docs:serve
+   ```
+
+3. **Open** [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser
+
+### Building Documentation
+
+To build static documentation:
+
+```bash
+mkdocs build
+# or
+npm run docs:build
+```
+
+The built documentation will be in the `site/` directory.
+
+### Documentation Contents
+
+- **[Getting Started](docs/getting-started.md)** - Installation and setup guide
+- **[Usage Guide](docs/usage.md)** - How to use the application
+- **[API Reference](docs/api-reference.md)** - Technical documentation and algorithm details
+- **[Deployment](docs/deployment.md)** - Deployment instructions for various platforms
+- **[Contributing](docs/contributing.md)** - Contribution guidelines
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
