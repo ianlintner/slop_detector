@@ -63,6 +63,11 @@ const FILLER_PHRASES = [
   'kind of',
 ];
 
+// Pre-compiled RegExp objects for filler phrases (for performance)
+const FILLER_REGEXES = FILLER_PHRASES.map(
+  filler => new RegExp(`\\b${filler}\\b`, 'gi')
+);
+
 export function analyzeSlopContent(content: string): SlopAnalysis {
   const lowerContent = content.toLowerCase();
   const words = content.split(/\s+/).filter(w => w.length > 0);
@@ -221,8 +226,7 @@ function calculateFluffScore(lowerContent: string, words: string[], details: str
   let score = 0;
   let fillerCount = 0;
   
-  FILLER_PHRASES.forEach(filler => {
-    const regex = new RegExp(`\\b${filler}\\b`, 'gi');
+  FILLER_REGEXES.forEach(regex => {
     const matches = lowerContent.match(regex);
     if (matches) {
       fillerCount += matches.length;

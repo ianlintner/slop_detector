@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ text });
   } catch (error) {
-    console.error('Error fetching transcript:', error);
+    console.error('Error fetching transcript:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
       { error: 'Failed to fetch YouTube transcript. The video may not have captions available.' },
       { status: 500 }
