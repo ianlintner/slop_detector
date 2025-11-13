@@ -2,6 +2,16 @@
 
 This guide will help you set up and run Slop Detector on your local machine.
 
+![Application Interface](https://github.com/user-attachments/assets/41fb8a7a-62c3-4b4a-9f2f-66a09c38f161)
+
+## What You'll Learn
+
+- ✅ How to install and run Slop Detector locally
+- ✅ Understanding the project structure
+- ✅ Configuring the application
+- ✅ Verifying your installation
+- ✅ Troubleshooting common issues
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:

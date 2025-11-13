@@ -2,12 +2,16 @@
 
 Learn how to use Slop Detector to analyze content quality.
 
+![Slop Detector Interface](https://github.com/user-attachments/assets/41fb8a7a-62c3-4b4a-9f2f-66a09c38f161)
+
 ## Interface Overview
 
 The Slop Detector interface consists of two main analysis modes:
 
 1. **📝 Text Content** - Direct text analysis
 2. **🎥 YouTube URL** - YouTube video transcript analysis
+
+Both modes provide the same comprehensive analysis, just with different input methods.
 
 ## Analyzing Text Content
 
@@ -52,6 +56,8 @@ this is a game-changer that will unlock incredible benefits!
 
 ### Step-by-Step Instructions
 
+![YouTube Analysis Tab](https://github.com/user-attachments/assets/31caf591-e47f-4e8e-96ba-498404e320b2)
+
 1. **Navigate to the YouTube URL Tab**
    - Click on the "🎥 YouTube URL" tab
 
@@ -80,6 +86,8 @@ this is a game-changer that will unlock incredible benefits!
 !!! warning "Video Limitations" - Videos without captions cannot be analyzed - Private or age-restricted videos may not work - Very long videos (>2 hours) may take longer to process
 
 ## Understanding the Results
+
+![Analysis Results Example](https://github.com/user-attachments/assets/702fe16e-3785-4791-a949-54f165347d12)
 
 ### Slop Score
 
