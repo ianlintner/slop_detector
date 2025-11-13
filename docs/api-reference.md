@@ -16,15 +16,17 @@ Slop Detector provides two modes of analysis:
 The main function that analyzes content for slop characteristics.
 
 **Parameters:**
+
 - `content` (string): The text content to analyze
 
 **Returns:** `SlopAnalysis` object
 
 **Example:**
+
 ```typescript
 import { analyzeSlopContent } from '@/lib/slopDetector';
 
-const text = "Your content here...";
+const text = 'Your content here...';
 const analysis = analyzeSlopContent(text);
 
 console.log(`Score: ${analysis.score}`);
@@ -37,15 +39,15 @@ console.log(`Details: ${analysis.details.join(', ')}`);
 
 ```typescript
 interface SlopAnalysis {
-  score: number;        // Overall slop score (0-100)
+  score: number; // Overall slop score (0-100)
   factors: {
-    repetitiveness: number;  // 0-100
-    aiGenerated: number;     // 0-100
-    clickbait: number;       // 0-100
-    lowEffort: number;       // 0-100
-    fluff: number;           // 0-100
+    repetitiveness: number; // 0-100
+    aiGenerated: number; // 0-100
+    clickbait: number; // 0-100
+    lowEffort: number; // 0-100
+    fluff: number; // 0-100
   };
-  details: string[];   // Array of specific issues detected
+  details: string[]; // Array of specific issues detected
 }
 ```
 
@@ -69,20 +71,20 @@ The overall slop score is computed as a weighted average:
 ```typescript
 score = Math.round(
   repetitiveness * 0.25 +
-  aiGenerated * 0.25 +
-  clickbait * 0.2 +
-  lowEffort * 0.15 +
-  fluff * 0.15
+    aiGenerated * 0.25 +
+    clickbait * 0.2 +
+    lowEffort * 0.15 +
+    fluff * 0.15
 );
 ```
 
-| Factor | Weight | Impact |
-|--------|--------|--------|
-| Repetitiveness | 25% | Highest impact |
-| AI-Generated | 25% | Highest impact |
-| Clickbait | 20% | High impact |
-| Low Effort | 15% | Moderate impact |
-| Fluff | 15% | Moderate impact |
+| Factor         | Weight | Impact          |
+| -------------- | ------ | --------------- |
+| Repetitiveness | 25%    | Highest impact  |
+| AI-Generated   | 25%    | Highest impact  |
+| Clickbait      | 20%    | High impact     |
+| Low Effort     | 15%    | Moderate impact |
+| Fluff          | 15%    | Moderate impact |
 
 ### Detection Methods
 
@@ -91,19 +93,22 @@ score = Math.round(
 **Method:** `calculateRepetitiveness(words, sentences, details)`
 
 **Logic:**
+
 1. Counts frequency of words longer than 3 characters
 2. Identifies words repeated more than 5 times
 3. Detects identical sentences appearing multiple times
 
 **Scoring:**
+
 - +30 points: High-repeat words found (>5 occurrences)
 - +40 points: Duplicate sentences detected
 - Cap: 100 points maximum
 
 **Example:**
+
 ```typescript
 // Input with repetition
-"The best product. The best service. The best price. 
+"The best product. The best service. The best price.
 The best quality. The best choice."
 
 // Detection: "best" repeated 5+ times → +30 points
@@ -114,13 +119,14 @@ The best quality. The best choice."
 **Method:** `calculateAIScore(lowerContent, details)`
 
 **Patterns Detected:**
+
 ```typescript
 const AI_PHRASES = [
   'delve into',
   'dive deep',
-  'it\'s important to note',
+  "it's important to note",
   'in conclusion',
-  'in today\'s digital age',
+  "in today's digital age",
   'revolutionize',
   'game-changer',
   'unlock the secrets',
@@ -136,13 +142,15 @@ const AI_PHRASES = [
 ```
 
 **Scoring:**
+
 - +15 points per AI phrase detected
 - Cap: 100 points maximum
 
 **Example:**
+
 ```typescript
 // Input with AI phrases
-"Let's delve into this comprehensive guide to navigate 
+"Let's delve into this comprehensive guide to navigate
 the complexities of this paradigm shift."
 
 // Detection: 4 AI phrases → 60 points
@@ -153,6 +161,7 @@ the complexities of this paradigm shift."
 **Method:** `calculateClickbaitScore(lowerContent, content, details)`
 
 **Patterns Detected:**
+
 ```typescript
 const CLICKBAIT_PATTERNS = [
   /you won't believe/i,
@@ -168,16 +177,18 @@ const CLICKBAIT_PATTERNS = [
 ```
 
 **Scoring:**
+
 - +25 points per clickbait pattern matched
 - +20 points if >5 exclamation marks found
 - Cap: 100 points maximum
 
 **Example:**
+
 ```typescript
 // Input with clickbait
-"You won't believe these 5 secrets doctors hate!!!"
+"You won't believe these 5 secrets doctors hate!!!";
 
-// Detection: 
+// Detection:
 // - "You won't believe" → +25
 // - "secrets" → +25
 // - "doctors hate" → +25
@@ -190,20 +201,23 @@ const CLICKBAIT_PATTERNS = [
 **Method:** `calculateLowEffortScore(content, words, sentences, details)`
 
 **Checks:**
+
 1. Very short content (<50 words)
 2. Unusually long sentences (>50 words average)
 3. Lack of structure (<3 sentences but >30 words)
 
 **Scoring:**
+
 - +40 points: Content <50 words
 - +30 points: Average sentence length >50 words
 - +20 points: Poor sentence structure
 - Cap: 100 points maximum
 
 **Example:**
+
 ```typescript
 // Input with low effort
-"Buy now great product works well very good"
+'Buy now great product works well very good';
 
 // Detection: Only 7 words → +40 points
 ```
@@ -213,6 +227,7 @@ const CLICKBAIT_PATTERNS = [
 **Method:** `calculateFluffScore(lowerContent, words, details)`
 
 **Filler Words Detected:**
+
 ```typescript
 const FILLER_PHRASES = [
   'basically',
@@ -230,14 +245,16 @@ const FILLER_PHRASES = [
 ```
 
 **Scoring:**
+
 - +50 points: Filler words >5% of total words
 - +25 points: Filler words >2% of total words
 - Cap: 100 points maximum
 
 **Example:**
+
 ```typescript
 // Input with fluff (50 words, 5 filler words = 10%)
-"So basically this is like literally the best thing..."
+'So basically this is like literally the best thing...';
 
 // Detection: 5/50 = 10% > 5% threshold → +50 points
 ```
@@ -249,11 +266,13 @@ const FILLER_PHRASES = [
 Converts numeric score to human-readable rating.
 
 **Parameters:**
+
 - `score` (number): Slop score from 0-100
 
 **Returns:** String rating
 
 **Mappings:**
+
 ```typescript
 score >= 80 → "Extreme Slop"
 score >= 60 → "High Slop"
@@ -263,9 +282,10 @@ score < 20  → "Minimal Slop"
 ```
 
 **Example:**
+
 ```typescript
-getSlopRating(75)  // Returns: "High Slop"
-getSlopRating(15)  // Returns: "Minimal Slop"
+getSlopRating(75); // Returns: "High Slop"
+getSlopRating(15); // Returns: "Minimal Slop"
 ```
 
 ### `getSlopColor(score: number): string`
@@ -273,11 +293,13 @@ getSlopRating(15)  // Returns: "Minimal Slop"
 Returns Tailwind CSS color class for score visualization.
 
 **Parameters:**
+
 - `score` (number): Slop score from 0-100
 
 **Returns:** Tailwind CSS color class string
 
 **Mappings:**
+
 ```typescript
 score >= 80 → "text-red-600"     // Extreme
 score >= 60 → "text-orange-600"  // High
@@ -287,9 +309,10 @@ score < 20  → "text-green-600"   // Minimal
 ```
 
 **Example:**
+
 ```typescript
-getSlopColor(85)  // Returns: "text-red-600"
-getSlopColor(10)  // Returns: "text-green-600"
+getSlopColor(85); // Returns: "text-red-600"
+getSlopColor(10); // Returns: "text-green-600"
 ```
 
 ## API Routes
@@ -299,13 +322,15 @@ getSlopColor(10)  // Returns: "text-green-600"
 Analyzes YouTube video transcripts.
 
 **Request Body:**
+
 ```typescript
 {
-  url: string;  // YouTube video URL
+  url: string; // YouTube video URL
 }
 ```
 
 **Response:**
+
 ```typescript
 {
   success: boolean;
@@ -315,6 +340,7 @@ Analyzes YouTube video transcripts.
 ```
 
 **Example:**
+
 ```bash
 curl -X POST http://localhost:3000/api/analyze-youtube \
   -H "Content-Type: application/json" \
@@ -326,6 +352,7 @@ curl -X POST http://localhost:3000/api/analyze-youtube \
 Analyzes content with optional AI consensus. See [AI Consensus Guide](ai-consensus.md) for detailed documentation.
 
 **Request Body:**
+
 ```typescript
 {
   content: string;  // Content to analyze
@@ -342,6 +369,7 @@ Analyzes content with optional AI consensus. See [AI Consensus Guide](ai-consens
 ```
 
 **Response:**
+
 ```typescript
 {
   success: boolean;
@@ -352,6 +380,7 @@ Analyzes content with optional AI consensus. See [AI Consensus Guide](ai-consens
 ```
 
 **Example:**
+
 ```bash
 curl -X POST http://localhost:3000/api/ai-analyze \
   -H "Content-Type: application/json" \
@@ -367,6 +396,7 @@ curl -X POST http://localhost:3000/api/ai-analyze \
 ```
 
 **Success Response:**
+
 ```json
 {
   "success": true,
@@ -388,6 +418,7 @@ curl -X POST http://localhost:3000/api/ai-analyze \
 ```
 
 **Error Response:**
+
 ```json
 {
   "success": false,
@@ -412,6 +443,7 @@ curl -X POST http://localhost:3000/api/ai-analyze \
 ### Optimization
 
 The algorithm is optimized for:
+
 - Fast execution (<100ms for typical content)
 - Low memory footprint
 - No database or external dependencies (except YouTube API)
@@ -461,7 +493,7 @@ export default function SlopAnalyzer() {
 ```javascript
 const { analyzeSlopContent } = require('./lib/slopDetector');
 
-const content = process.argv[2] || "Sample text to analyze";
+const content = process.argv[2] || 'Sample text to analyze';
 const analysis = analyzeSlopContent(content);
 
 console.log(`Slop Score: ${analysis.score}/100`);
@@ -470,7 +502,7 @@ Object.entries(analysis.factors).forEach(([key, value]) => {
   console.log(`  ${key}: ${value}`);
 });
 console.log('\nDetails:');
-analysis.details.forEach(detail => console.log(`  - ${detail}`));
+analysis.details.forEach((detail) => console.log(`  - ${detail}`));
 ```
 
 ## Extending the Algorithm
@@ -502,11 +534,11 @@ Modify the scoring weights in `analyzeSlopContent`:
 
 ```typescript
 const score = Math.round(
-  repetitiveness * 0.30 +  // Increased from 0.25
-  aiGenerated * 0.20 +      // Decreased from 0.25
-  clickbait * 0.20 +
-  lowEffort * 0.15 +
-  fluff * 0.15
+  repetitiveness * 0.3 + // Increased from 0.25
+    aiGenerated * 0.2 + // Decreased from 0.25
+    clickbait * 0.2 +
+    lowEffort * 0.15 +
+    fluff * 0.15
 );
 ```
 
@@ -517,10 +549,10 @@ Create your own scoring function:
 ```typescript
 export function customAnalyze(content: string): CustomAnalysis {
   const baseAnalysis = analyzeSlopContent(content);
-  
+
   // Add custom logic
   const customScore = calculateCustomMetric(content);
-  
+
   return {
     ...baseAnalysis,
     customMetric: customScore,

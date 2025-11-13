@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { analyzeSlopContent, getSlopRating, getSlopColor } from '@/lib/slopDetector';
+import {
+  analyzeSlopContent,
+  getSlopRating,
+  getSlopColor,
+} from '@/lib/slopDetector';
 import { EnrichedSlopAnalysis } from '@/lib/aiConsensus';
 
 export default function Home() {
@@ -17,7 +21,9 @@ export default function Home() {
   // Helper function to get AI config
   const getAIConfig = () => ({
     useAI: true,
-    providers: [{ name: process.env.NEXT_PUBLIC_DEFAULT_AI_PROVIDER || 'mock' }],
+    providers: [
+      { name: process.env.NEXT_PUBLIC_DEFAULT_AI_PROVIDER || 'mock' },
+    ],
     includeInternal: true,
     weights: {
       internal: 0.5,
@@ -30,11 +36,11 @@ export default function Home() {
       setError('Please enter some text to analyze');
       return;
     }
-    
+
     setError('');
     setAiWarning('');
     setLoading(true);
-    
+
     try {
       if (useAI) {
         // Use AI consensus endpoint
@@ -50,11 +56,11 @@ export default function Home() {
         });
 
         const data = await response.json();
-        
+
         if (!response.ok) {
           throw new Error(data.error || 'Failed to analyze with AI');
         }
-        
+
         setAnalysis(data.analysis);
         if (data.warning) {
           setAiWarning(data.warning);
@@ -77,11 +83,11 @@ export default function Home() {
       setError('Please enter a YouTube URL');
       return;
     }
-    
+
     setError('');
     setAiWarning('');
     setLoading(true);
-    
+
     try {
       // Fetch transcript from YouTube
       const response = await fetch('/api/youtube', {
@@ -91,13 +97,13 @@ export default function Home() {
         },
         body: JSON.stringify({ url: youtubeUrl }),
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch transcript');
       }
-      
+
       // Analyze the transcript with optional AI
       if (useAI) {
         const aiResponse = await fetch('/api/ai-analyze', {
@@ -124,7 +130,11 @@ export default function Home() {
         setAnalysis(result);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch YouTube transcript');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to fetch YouTube transcript'
+      );
       console.error(err);
     } finally {
       setLoading(false);
@@ -148,7 +158,8 @@ export default function Home() {
             🔍 Slop Detector
           </h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Analyze content for low-effort, repetitive, AI-generated, or spammy characteristics
+            Analyze content for low-effort, repetitive, AI-generated, or spammy
+            characteristics
           </p>
         </div>
 
@@ -244,7 +255,8 @@ export default function Home() {
                   🤖 Enable AI Consensus Analysis
                 </span>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  Use multiple AI models to enrich the analysis with additional insights
+                  Use multiple AI models to enrich the analysis with additional
+                  insights
                 </p>
               </div>
             </label>
@@ -256,7 +268,11 @@ export default function Home() {
             disabled={loading}
             className="w-full mt-6 py-4 px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:from-zinc-400 disabled:to-zinc-500 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
           >
-            {loading ? '🔄 Analyzing...' : useAI ? '🤖 Analyze with AI' : '🔍 Analyze Content'}
+            {loading
+              ? '🔄 Analyzing...'
+              : useAI
+                ? '🤖 Analyze with AI'
+                : '🔍 Analyze Content'}
           </button>
         </div>
 
@@ -271,9 +287,13 @@ export default function Home() {
             <div className="mb-8 p-6 bg-gradient-to-r from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-800 rounded-xl">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-lg font-medium text-zinc-700 dark:text-zinc-300">
-                  {analysis.finalScore !== undefined ? 'Final Blended Score' : 'Overall Slop Score'}
+                  {analysis.finalScore !== undefined
+                    ? 'Final Blended Score'
+                    : 'Overall Slop Score'}
                 </span>
-                <span className={`text-4xl font-bold ${getSlopColor(analysis.finalScore ?? analysis.score)}`}>
+                <span
+                  className={`text-4xl font-bold ${getSlopColor(analysis.finalScore ?? analysis.score)}`}
+                >
                   {analysis.finalScore ?? analysis.score}/100
                 </span>
               </div>
@@ -283,12 +303,12 @@ export default function Home() {
                     (analysis.finalScore ?? analysis.score) >= 80
                       ? 'bg-red-600'
                       : (analysis.finalScore ?? analysis.score) >= 60
-                      ? 'bg-orange-500'
-                      : (analysis.finalScore ?? analysis.score) >= 40
-                      ? 'bg-yellow-500'
-                      : (analysis.finalScore ?? analysis.score) >= 20
-                      ? 'bg-blue-500'
-                      : 'bg-green-500'
+                        ? 'bg-orange-500'
+                        : (analysis.finalScore ?? analysis.score) >= 40
+                          ? 'bg-yellow-500'
+                          : (analysis.finalScore ?? analysis.score) >= 20
+                            ? 'bg-blue-500'
+                            : 'bg-green-500'
                   }`}
                   style={{ width: `${analysis.finalScore ?? analysis.score}%` }}
                 />
@@ -300,12 +320,20 @@ export default function Home() {
                 <div className="mt-4 pt-4 border-t border-zinc-300 dark:border-zinc-600">
                   <div className="flex justify-around text-sm">
                     <div className="text-center">
-                      <div className="text-zinc-600 dark:text-zinc-400">Internal Score</div>
-                      <div className="font-bold text-zinc-900 dark:text-zinc-100">{analysis.score}</div>
+                      <div className="text-zinc-600 dark:text-zinc-400">
+                        Internal Score
+                      </div>
+                      <div className="font-bold text-zinc-900 dark:text-zinc-100">
+                        {analysis.score}
+                      </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-zinc-600 dark:text-zinc-400">AI Consensus</div>
-                      <div className="font-bold text-zinc-900 dark:text-zinc-100">{analysis.aiConsensus?.consensusScore}</div>
+                      <div className="text-zinc-600 dark:text-zinc-400">
+                        AI Consensus
+                      </div>
+                      <div className="font-bold text-zinc-900 dark:text-zinc-100">
+                        {analysis.aiConsensus?.consensusScore}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -319,7 +347,7 @@ export default function Home() {
                   <span>🤖</span>
                   AI Consensus Analysis
                 </h3>
-                
+
                 {/* AI Confidence */}
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-1">
@@ -333,7 +361,9 @@ export default function Home() {
                   <div className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2 overflow-hidden">
                     <div
                       className="h-full bg-blue-600"
-                      style={{ width: `${analysis.aiConsensus.confidence * 100}%` }}
+                      style={{
+                        width: `${analysis.aiConsensus.confidence * 100}%`,
+                      }}
                     />
                   </div>
                 </div>
@@ -364,24 +394,26 @@ export default function Home() {
                       Individual Provider Scores:
                     </h4>
                     <div className="space-y-2">
-                      {analysis.aiConsensus.individualResults.map((result, index) => (
-                        <div
-                          key={index}
-                          className="p-3 bg-white dark:bg-zinc-900 rounded-lg"
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                              {result.provider}
-                            </span>
-                            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                              {result.score}/100
-                            </span>
+                      {analysis.aiConsensus.individualResults.map(
+                        (result, index) => (
+                          <div
+                            key={index}
+                            className="p-3 bg-white dark:bg-zinc-900 rounded-lg"
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                                {result.provider}
+                              </span>
+                              <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                                {result.score}/100
+                              </span>
+                            </div>
+                            <div className="text-xs text-zinc-600 dark:text-zinc-400">
+                              Confidence: {Math.round(result.confidence * 100)}%
+                            </div>
                           </div>
-                          <div className="text-xs text-zinc-600 dark:text-zinc-400">
-                            Confidence: {Math.round(result.confidence * 100)}%
-                          </div>
-                        </div>
-                      ))}
+                        )
+                      )}
                     </div>
                   </div>
                 )}
@@ -395,7 +427,10 @@ export default function Home() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(analysis.factors).map(([key, value]) => (
-                  <div key={key} className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+                  <div
+                    key={key}
+                    className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg"
+                  >
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium text-zinc-700 dark:text-zinc-300 capitalize">
                         {key.replace(/([A-Z])/g, ' $1').trim()}
@@ -407,7 +442,11 @@ export default function Home() {
                     <div className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2 overflow-hidden">
                       <div
                         className={`h-full ${
-                          value >= 70 ? 'bg-red-500' : value >= 40 ? 'bg-yellow-500' : 'bg-green-500'
+                          value >= 70
+                            ? 'bg-red-500'
+                            : value >= 40
+                              ? 'bg-yellow-500'
+                              : 'bg-green-500'
                         }`}
                         style={{ width: `${value}%` }}
                       />
@@ -429,7 +468,9 @@ export default function Home() {
                       key={index}
                       className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg text-zinc-700 dark:text-zinc-300 flex items-start gap-2"
                     >
-                      <span className="text-yellow-600 dark:text-yellow-500 mt-1">⚠️</span>
+                      <span className="text-yellow-600 dark:text-yellow-500 mt-1">
+                        ⚠️
+                      </span>
                       <span>{detail}</span>
                     </li>
                   ))}

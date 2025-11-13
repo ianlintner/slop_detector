@@ -40,17 +40,20 @@ We are committed to providing a welcoming and inclusive environment for all cont
    - Click the "Fork" button in the top right
 
 2. **Clone your fork**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/slop_detector.git
    cd slop_detector
    ```
 
 3. **Add upstream remote**
+
    ```bash
    git remote add upstream https://github.com/ianlintner/slop_detector.git
    ```
 
 4. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -78,6 +81,7 @@ git checkout -b fix/your-bug-fix
 ```
 
 Branch naming conventions:
+
 - `feature/` - New features
 - `fix/` - Bug fixes
 - `docs/` - Documentation updates
@@ -92,6 +96,7 @@ Branch naming conventions:
    - Add comments where necessary
 
 2. **Test your changes**
+
    ```bash
    npm run dev  # Test in development
    npm run build  # Ensure it builds
@@ -117,6 +122,7 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -126,6 +132,7 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 - `chore`: Maintenance tasks
 
 **Examples:**
+
 ```bash
 feat: add support for analyzing markdown files
 fix: correct slop score calculation for short content
@@ -143,6 +150,7 @@ refactor: simplify repetitiveness detection algorithm
 - Use interfaces for object shapes
 
 **Example:**
+
 ```typescript
 // Good
 interface SlopOptions {
@@ -150,7 +158,10 @@ interface SlopOptions {
   includeFluff: boolean;
 }
 
-function analyzeWithOptions(content: string, options: SlopOptions): SlopAnalysis {
+function analyzeWithOptions(
+  content: string,
+  options: SlopOptions
+): SlopAnalysis {
   // Implementation
 }
 
@@ -169,25 +180,26 @@ function analyzeWithOptions(content: any, options: any): any {
 - Keep functions small and focused
 
 **Example:**
+
 ```typescript
 // Good
 function calculateScore(factors: ScoreFactors): number {
   const weights = {
     repetitiveness: 0.25,
     aiGenerated: 0.25,
-    clickbait: 0.20,
+    clickbait: 0.2,
   };
-  
+
   return Math.round(
     factors.repetitiveness * weights.repetitiveness +
-    factors.aiGenerated * weights.aiGenerated +
-    factors.clickbait * weights.clickbait
+      factors.aiGenerated * weights.aiGenerated +
+      factors.clickbait * weights.clickbait
   );
 }
 
 // Avoid
 function calc(f: any) {
-  return Math.round(f.r*.25+f.a*.25+f.c*.2);
+  return Math.round(f.r * 0.25 + f.a * 0.25 + f.c * 0.2);
 }
 ```
 
@@ -199,6 +211,7 @@ function calc(f: any) {
 - Extract reusable logic into custom hooks
 
 **Example:**
+
 ```typescript
 // Good
 interface AnalysisResultProps {
@@ -250,6 +263,7 @@ While Slop Detector doesn't currently have a test suite, contributions that add 
 If you want to add tests:
 
 1. **Install testing dependencies**
+
    ```bash
    npm install -D vitest @testing-library/react @testing-library/jest-dom
    ```
@@ -260,6 +274,7 @@ If you want to add tests:
    - Example: `lib/slopDetector.test.ts`
 
 3. **Write tests**
+
    ```typescript
    import { describe, it, expect } from 'vitest';
    import { analyzeSlopContent } from './slopDetector';
@@ -268,9 +283,9 @@ If you want to add tests:
      it('should detect clickbait patterns', () => {
        const content = "You won't believe this shocking trick!";
        const result = analyzeSlopContent(content);
-       
+
        expect(result.factors.clickbait).toBeGreaterThan(0);
-       expect(result.details.some(d => d.includes('Clickbait'))).toBe(true);
+       expect(result.details.some((d) => d.includes('Clickbait'))).toBe(true);
      });
    });
    ```
@@ -297,6 +312,7 @@ Always manually test your changes:
 ### Before Submitting
 
 1. **Update your branch**
+
    ```bash
    git checkout main
    git pull upstream main
@@ -305,6 +321,7 @@ Always manually test your changes:
    ```
 
 2. **Ensure everything works**
+
    ```bash
    npm run build
    npm run lint
@@ -318,6 +335,7 @@ Always manually test your changes:
 ### Submitting the PR
 
 1. **Push your changes**
+
    ```bash
    git push origin your-branch
    ```
@@ -337,21 +355,26 @@ Always manually test your changes:
    - Related issue numbers
 
 **Example:**
+
 ```markdown
 ## Description
+
 Added support for detecting markdown-specific slop patterns.
 
 ## Changes
+
 - Added markdown pattern detection to slopDetector.ts
 - Updated UI to show markdown-specific warnings
 - Added documentation for markdown analysis
 
 ## Testing
+
 1. Run `npm run dev`
 2. Paste markdown content in the text area
 3. Verify markdown patterns are detected
 
 ## Related Issues
+
 Fixes #123
 ```
 
@@ -382,6 +405,7 @@ When reporting bugs, include:
    - Expected behavior vs actual behavior
 
 2. **Steps to Reproduce**
+
    ```
    1. Go to '...'
    2. Click on '...'
@@ -434,6 +458,7 @@ git diff             # See changes
 ### VS Code Extensions
 
 Recommended extensions:
+
 - ESLint
 - Prettier
 - TypeScript and JavaScript Language Features
@@ -462,6 +487,7 @@ Recommended extensions:
 ## Recognition
 
 Contributors will be:
+
 - Listed in the project README
 - Credited in release notes
 - Appreciated by the community!

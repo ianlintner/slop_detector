@@ -10,7 +10,7 @@ import {
 export async function POST(request: NextRequest) {
   try {
     const { content, config } = await request.json();
-    
+
     if (typeof content !== 'string' || content.trim().length === 0) {
       return NextResponse.json(
         { error: 'Content must be a non-empty string' },
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     // If AI consensus is requested and configured
     const useAI = config?.useAI ?? false;
-    
+
     if (!useAI) {
       // Return just internal analysis
       return NextResponse.json({
@@ -58,7 +58,11 @@ export async function POST(request: NextRequest) {
 
     try {
       const aiConsensus = await performAIConsensus(content, aiConfig);
-      const enrichedAnalysis = enrichWithAI(internalAnalysis, aiConsensus, aiConfig);
+      const enrichedAnalysis = enrichWithAI(
+        internalAnalysis,
+        aiConsensus,
+        aiConfig
+      );
 
       return NextResponse.json({
         success: true,
@@ -67,20 +71,22 @@ export async function POST(request: NextRequest) {
     } catch (aiError) {
       // If AI analysis fails, return internal analysis with error info
       console.error('AI consensus analysis failed:', aiError);
-      
+
       return NextResponse.json({
         success: true,
         analysis: internalAnalysis,
-        warning: 'AI consensus analysis not available. Showing internal analysis only.',
-        aiError: aiError instanceof Error ? aiError.message : 'Unknown AI error',
+        warning:
+          'AI consensus analysis not available. Showing internal analysis only.',
+        aiError:
+          aiError instanceof Error ? aiError.message : 'Unknown AI error',
       });
     }
   } catch (error) {
     console.error('Error in AI analyze endpoint:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to analyze content',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -97,7 +103,8 @@ export async function GET() {
         config: {
           useAI: 'boolean (optional) - Enable AI consensus analysis',
           providers: 'array (optional) - AI providers to use',
-          includeInternal: 'boolean (optional) - Include internal scoring in consensus',
+          includeInternal:
+            'boolean (optional) - Include internal scoring in consensus',
           weights: {
             internal: 'number (optional) - Weight for internal score (0-1)',
             ai: 'number (optional) - Weight for AI consensus (0-1)',

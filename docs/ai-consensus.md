@@ -135,7 +135,7 @@ import { AIProvider } from '@/lib/aiConsensus';
 const providers: AIProvider[] = [
   { name: 'openai', apiKey: process.env.OPENAI_API_KEY },
   { name: 'anthropic', apiKey: process.env.ANTHROPIC_API_KEY },
-  { name: 'mock' } // For testing
+  { name: 'mock' }, // For testing
 ];
 ```
 
@@ -146,9 +146,9 @@ Adjust the balance between internal and AI scoring:
 ```typescript
 const config = {
   weights: {
-    internal: 0.3,  // 30% weight to internal analysis
-    ai: 0.7         // 70% weight to AI consensus
-  }
+    internal: 0.3, // 30% weight to internal analysis
+    ai: 0.7, // 70% weight to AI consensus
+  },
 };
 ```
 
@@ -165,14 +165,12 @@ const internalAnalysis = analyzeSlopContent(content);
 
 // Perform AI consensus
 const aiConsensus = await performAIConsensus(content, {
-  providers: [
-    { name: 'mock' }
-  ],
+  providers: [{ name: 'mock' }],
   includeInternal: true,
   weights: {
     internal: 0.5,
-    ai: 0.5
-  }
+    ai: 0.5,
+  },
 });
 
 // Enrich with AI results
@@ -198,10 +196,10 @@ export async function analyzeWithCustomAI(
   const response = await fetch('https://your-ai-api.com/analyze', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ content })
+    body: JSON.stringify({ content }),
   });
 
   const data = await response.json();
@@ -211,7 +209,7 @@ export async function analyzeWithCustomAI(
     score: data.score,
     reasoning: data.reasoning,
     confidence: data.confidence,
-    factors: data.factors
+    factors: data.factors,
   };
 }
 
@@ -224,6 +222,7 @@ PROVIDER_IMPLEMENTATIONS['customai'] = analyzeWithCustomAI;
 ### 1. Enhanced Accuracy
 
 Combining rule-based detection with AI models provides:
+
 - Better detection of subtle patterns
 - Contextual understanding of content
 - Reduced false positives/negatives
@@ -231,6 +230,7 @@ Combining rule-based detection with AI models provides:
 ### 2. Flexibility
 
 Choose when to use AI analysis:
+
 - Use only internal analysis for fast, offline operation
 - Enable AI for critical content that needs deeper analysis
 - Mix and match providers based on your needs
@@ -238,6 +238,7 @@ Choose when to use AI analysis:
 ### 3. Transparency
 
 Get detailed insights:
+
 - See both internal and AI scores separately
 - Understand AI reasoning through insights
 - View individual provider results
