@@ -83,6 +83,59 @@ See [AI Consensus Documentation](docs/ai-consensus.md) for more details.
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first styling
 - **youtube-transcript** - Fetching YouTube video transcripts
+- **Jest** - Testing framework
+- **React Testing Library** - React component testing
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
+
+## Development
+
+### Code Quality
+
+This project uses automated code quality tools:
+
+```bash
+# Run linter
+npm run lint
+
+# Fix linting issues automatically
+npm run lint:fix
+
+# Format code with Prettier
+npm run format
+
+# Check if code is properly formatted
+npm run format:check
+```
+
+### Testing
+
+The project includes comprehensive tests using Jest:
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+```
+
+All core business logic in `/lib` has corresponding tests in `/lib/__tests__`. When making changes, please:
+
+1. Run existing tests to ensure nothing breaks
+2. Add new tests for new features
+3. Maintain good test coverage
+
+### Continuous Integration
+
+The project uses GitHub Actions for CI/CD:
+
+- **Automated checks** run on all pull requests and pushes to `main`/`develop`
+- **Checks include**: linting, formatting, testing, and building
+- **All checks must pass** before merging
 
 ## Building for Production
 
