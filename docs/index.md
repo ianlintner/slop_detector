@@ -12,7 +12,6 @@ Slop Detector is a Next.js application that analyzes content for "slop" - low-ef
 
 ### Text Content Analysis
 
-![Text Analysis Interface](https://github.com/user-attachments/assets/41fb8a7a-62c3-4b4a-9f2f-66a09c38f161)
 
 The main interface provides an intuitive text input for analyzing any content you want to check for slop characteristics.
 
