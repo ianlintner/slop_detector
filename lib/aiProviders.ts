@@ -210,11 +210,15 @@ export async function analyzeWithNamedProvider(
   provider: AIProvider
 ): Promise<AIAnalysisResult> {
   const providerName = provider.name.toLowerCase();
-  const implementation = PROVIDER_IMPLEMENTATIONS[providerName];
   
-  if (!implementation) {
-    throw new Error(`Unknown provider: ${provider.name}. Available providers: ${Object.keys(PROVIDER_IMPLEMENTATIONS).join(', ')}`);
+  // Validate provider name against allowed list to prevent code injection
+  const allowedProviders = Object.keys(PROVIDER_IMPLEMENTATIONS);
+  if (!allowedProviders.includes(providerName)) {
+    // Sanitize provider name for error message to prevent injection
+    const sanitizedName = provider.name.replace(/[^a-zA-Z0-9-_]/g, '');
+    throw new Error(`Unknown provider: ${sanitizedName}. Available providers: ${allowedProviders.join(', ')}`);
   }
   
+  const implementation = PROVIDER_IMPLEMENTATIONS[providerName];
   return implementation(content, provider.apiKey);
 }

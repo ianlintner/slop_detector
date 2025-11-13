@@ -133,7 +133,11 @@ export async function performAIConsensus(
       const result = await analyzeWithProvider(content, provider);
       results.push(result);
     } catch (error) {
-      console.error(`Failed to analyze with ${provider.name}:`, error);
+      // Log error without using user-controlled provider name in format string
+      console.error('Failed to analyze with AI provider:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        providerNameLength: provider.name.length
+      });
       // Continue with other providers even if one fails
     }
   }
