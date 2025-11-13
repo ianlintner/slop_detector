@@ -6,6 +6,7 @@ A Next.js application that analyzes content for "slop" - low-effort, repetitive,
 
 - **Text Analysis**: Paste any text content directly to analyze it for slop characteristics
 - **YouTube Analysis**: Enter a YouTube URL to analyze video transcripts/captions for slop
+- **AI Consensus** (New!): Enrich analysis with multiple AI providers for enhanced accuracy
 - **Custom Slop Score**: Get a 0-100 score based on multiple factors:
   - **Repetitiveness**: Detects repeated words, phrases, and sentences
   - **AI-Generated Content**: Identifies common AI writing patterns and phrases
@@ -49,8 +50,24 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 1. Select the "🎥 YouTube URL" tab
 2. Enter a YouTube video URL (the video must have captions/transcripts available)
-3. Click "🔍 Analyze Content"
-4. View the slop analysis of the video's transcript
+3. Optionally enable "🤖 AI Consensus Analysis" for enhanced analysis
+4. Click "🔍 Analyze Content" or "🤖 Analyze with AI"
+5. View the slop analysis of the video's transcript
+
+### Using AI Consensus Analysis
+
+For more accurate and detailed analysis, you can enable AI consensus:
+
+1. Check the "🤖 Enable AI Consensus Analysis" checkbox
+2. Click "🤖 Analyze with AI" to get:
+   - Blended score combining internal analysis and AI insights
+   - Detailed AI reasoning for the assessment
+   - Confidence levels for AI predictions
+   - Individual provider scores (if using multiple AI models)
+
+See [AI Consensus Documentation](docs/ai-consensus.md) for more details.
+
+**Note**: AI analysis requires API keys for AI providers (OpenAI, Anthropic, etc.). A mock provider is available for testing without API keys.
 
 ## Slop Score Ratings
 
@@ -114,6 +131,7 @@ The built documentation will be in the `site/` directory.
 
 - **[Getting Started](docs/getting-started.md)** - Installation and setup guide
 - **[Usage Guide](docs/usage.md)** - How to use the application
+- **[AI Consensus](docs/ai-consensus.md)** - Guide to using AI consensus analysis
 - **[API Reference](docs/api-reference.md)** - Technical documentation and algorithm details
 - **[Deployment](docs/deployment.md)** - Deployment instructions for various platforms
 - **[Contributing](docs/contributing.md)** - Contribution guidelines

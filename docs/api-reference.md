@@ -2,6 +2,13 @@
 
 Technical documentation for the Slop Detector algorithm and API.
 
+## Overview
+
+Slop Detector provides two modes of analysis:
+
+1. **Internal Analysis** - Fast, rule-based detection using predefined patterns
+2. **AI Consensus Analysis** - Enhanced analysis using multiple AI providers (see [AI Consensus Guide](ai-consensus.md))
+
 ## Core API
 
 ### `analyzeSlopContent(content: string): SlopAnalysis`
@@ -312,6 +319,51 @@ Analyzes YouTube video transcripts.
 curl -X POST http://localhost:3000/api/analyze-youtube \
   -H "Content-Type: application/json" \
   -d '{"url": "https://www.youtube.com/watch?v=VIDEO_ID"}'
+```
+
+### POST `/api/ai-analyze`
+
+Analyzes content with optional AI consensus. See [AI Consensus Guide](ai-consensus.md) for detailed documentation.
+
+**Request Body:**
+```typescript
+{
+  content: string;  // Content to analyze
+  config?: {
+    useAI?: boolean;          // Enable AI consensus (default: false)
+    providers?: AIProvider[]; // AI providers to use, e.g., [{ name: 'openai', apiKey?: 'sk-...' }]
+    includeInternal?: boolean; // Include internal score (default: true)
+    weights?: {
+      internal?: number;      // Weight for internal score (default: 0.5)
+      ai?: number;           // Weight for AI consensus (default: 0.5)
+    }
+  }
+}
+```
+
+**Response:**
+```typescript
+{
+  success: boolean;
+  analysis: EnrichedSlopAnalysis; // May include AI consensus data
+  warning?: string;               // Warning if AI analysis failed
+  aiError?: string;              // Details of AI error
+}
+```
+
+**Example:**
+```bash
+curl -X POST http://localhost:3000/api/ai-analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Your content here...",
+    "config": {
+      "useAI": true,
+      "providers": [{"name": "mock"}],
+      "includeInternal": true,
+      "weights": {"internal": 0.5, "ai": 0.5}
+    }
+  }'
 ```
 
 **Success Response:**
