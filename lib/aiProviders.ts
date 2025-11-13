@@ -55,7 +55,26 @@ export async function analyzeWithOpenAI(
     }
 
     const data = await response.json();
-    const aiResponse = JSON.parse(data.choices[0].message.content);
+    if (
+      !data.choices ||
+      !Array.isArray(data.choices) ||
+      data.choices.length === 0 ||
+      !data.choices[0].message ||
+      typeof data.choices[0].message.content !== 'string'
+    ) {
+      throw new Error('Invalid response structure from OpenAI API');
+    }
+
+    let aiResponse;
+    try {
+      aiResponse = JSON.parse(data.choices[0].message.content);
+    } catch (parseError) {
+      throw new Error(`Failed to parse OpenAI response as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+    }
+    // Validate required fields
+    if (typeof aiResponse.score !== 'number') {
+      throw new Error('OpenAI response missing required "score" field');
+    }
 
     return {
       provider: 'OpenAI',
@@ -111,15 +130,35 @@ export async function analyzeWithAnthropic(
     }
 
     const data = await response.json();
+    if (
+      !data.content ||
+      !Array.isArray(data.content) ||
+      data.content.length === 0 ||
+      !data.content[0].text
+    ) {
+      throw new Error('Invalid response structure from Anthropic API');
+    }
     const textContent = data.content[0].text;
     
     // Extract JSON from response (Claude might include additional text)
-    const jsonMatch = textContent.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('Could not parse JSON from Anthropic response');
+    // Use non-greedy approach to avoid capturing multiple JSON objects
+    const jsonStart = textContent.indexOf('{');
+    const jsonEnd = textContent.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
+      throw new Error('Could not find JSON object in Anthropic response');
     }
+    const jsonStr = textContent.substring(jsonStart, jsonEnd + 1);
     
-    const aiResponse = JSON.parse(jsonMatch[0]);
+    let aiResponse;
+    try {
+      aiResponse = JSON.parse(jsonStr);
+    } catch (parseError) {
+      throw new Error(`Failed to parse Anthropic response as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+    }
+
+    if (typeof aiResponse.score !== 'number') {
+      throw new Error('Anthropic response missing required "score" field');
+    }
 
     return {
       provider: 'Anthropic',

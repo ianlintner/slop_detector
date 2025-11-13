@@ -92,6 +92,15 @@ export function aggregateAIResults(
 
   // Calculate weighted consensus score based on confidence
   const totalWeight = results.reduce((sum, r) => sum + r.confidence, 0);
+  if (totalWeight === 0) {
+    // Handle case where all confidences are 0
+    return {
+      consensusScore: 0,
+      individualResults: results,
+      confidence: 0,
+      insights: ['All AI providers returned 0 confidence'],
+    };
+  }
   const consensusScore = Math.round(
     results.reduce((sum, r) => sum + r.score * r.confidence, 0) / totalWeight
   );
@@ -127,20 +136,31 @@ export async function performAIConsensus(
 ): Promise<AIConsensusResult> {
   const results: AIAnalysisResult[] = [];
 
-  // Analyze with each configured provider
-  for (const provider of config.providers) {
-    try {
-      const result = await analyzeWithProvider(content, provider);
-      results.push(result);
-    } catch (error) {
+  // Analyze with all providers in parallel
+  const promises = config.providers.map(provider =>
+    analyzeWithProvider(content, provider)
+      .then(result => ({ status: 'fulfilled' as const, value: result }))
+      .catch((error: unknown) => ({
+        status: 'rejected' as const,
+        reason: error,
+        providerName: provider.name
+      }))
+  );
+
+  const settled = await Promise.all(promises);
+
+  settled.forEach((result) => {
+    if (result.status === 'fulfilled') {
+      results.push(result.value);
+    } else {
       // Log error without using user-controlled provider name in format string
       console.error('Failed to analyze with AI provider:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        providerNameLength: provider.name.length
+        error: result.reason instanceof Error ? result.reason.message : 'Unknown error',
+        providerNameLength: result.providerName.length
       });
       // Continue with other providers even if one fails
     }
-  }
+  });
 
   return aggregateAIResults(results);
 }
@@ -183,7 +203,12 @@ export async function callAIProvider(
   // This is a generic function that can be customized per provider
   // For security, API keys should be stored in environment variables
   
-  if (!provider.apiKey && !process.env[`${provider.name.toUpperCase()}_API_KEY`]) {
+  const ALLOWED_ENV_KEYS: Record<string, string> = {
+    'openai': 'OPENAI_API_KEY',
+    'anthropic': 'ANTHROPIC_API_KEY',
+  };
+  const envKey = ALLOWED_ENV_KEYS[provider.name.toLowerCase()];
+  if (!provider.apiKey && (!envKey || !process.env[envKey])) {
     throw new Error(`API key not configured for provider: ${provider.name}`);
   }
 
@@ -196,6 +221,15 @@ export async function callAIProvider(
  * Create a prompt for AI slop analysis
  */
 export function createSlopAnalysisPrompt(content: string): string {
+  // Limit content length to prevent token limit issues
+  const maxLength = 10000;
+  const truncatedContent = content.length > maxLength 
+    ? content.substring(0, maxLength) + '...[truncated]'
+    : content;
+  
+  // Escape triple quotes to prevent breaking the prompt structure
+  const sanitizedContent = truncatedContent.replace(/"""/g, '\\"""');
+  
   return `Analyze the following content for "slop" characteristics - low-effort, repetitive, AI-generated, clickbait, or spammy content.
 
 Provide a score from 0-100 where:
@@ -214,7 +248,7 @@ Analyze these factors:
 
 Content to analyze:
 """
-${content}
+${sanitizedContent}
 """
 
 Respond with:

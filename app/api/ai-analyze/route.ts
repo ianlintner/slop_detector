@@ -11,9 +11,9 @@ export async function POST(request: NextRequest) {
   try {
     const { content, config } = await request.json();
     
-    if (!content) {
+    if (typeof content !== 'string' || content.trim().length === 0) {
       return NextResponse.json(
-        { error: 'Content is required' },
+        { error: 'Content must be a non-empty string' },
         { status: 400 }
       );
     }
@@ -33,9 +33,27 @@ export async function POST(request: NextRequest) {
     }
 
     // Perform AI consensus analysis
+    // Validate and normalize weights if present in config
+    const normalizedConfig = { ...config };
+    if (normalizedConfig.weights) {
+      let internal = Number(normalizedConfig.weights.internal);
+      let ai = Number(normalizedConfig.weights.ai);
+      // Default to 0.5 if not a valid number
+      if (!isFinite(internal) || internal < 0 || internal > 1) internal = 0.5;
+      if (!isFinite(ai) || ai < 0 || ai > 1) ai = 0.5;
+      const sum = internal + ai;
+      if (sum > 0) {
+        normalizedConfig.weights.internal = internal / sum;
+        normalizedConfig.weights.ai = ai / sum;
+      } else {
+        // If both are zero, default to 0.5 each
+        normalizedConfig.weights.internal = 0.5;
+        normalizedConfig.weights.ai = 0.5;
+      }
+    }
     const aiConfig: AIConsensusConfig = {
       ...DEFAULT_AI_CONFIG,
-      ...config,
+      ...normalizedConfig,
     };
 
     try {

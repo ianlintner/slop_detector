@@ -14,6 +14,17 @@ export default function Home() {
   const [useAI, setUseAI] = useState(false);
   const [aiWarning, setAiWarning] = useState('');
 
+  // Helper function to get AI config
+  const getAIConfig = () => ({
+    useAI: true,
+    providers: [{ name: process.env.NEXT_PUBLIC_DEFAULT_AI_PROVIDER || 'mock' }],
+    includeInternal: true,
+    weights: {
+      internal: 0.5,
+      ai: 0.5,
+    },
+  });
+
   const handleAnalyzeText = async () => {
     if (!textContent.trim()) {
       setError('Please enter some text to analyze');
@@ -34,15 +45,7 @@ export default function Home() {
           },
           body: JSON.stringify({
             content: textContent,
-            config: {
-              useAI: true,
-              providers: [{ name: 'mock' }], // Using mock provider by default
-              includeInternal: true,
-              weights: {
-                internal: 0.5,
-                ai: 0.5,
-              },
-            },
+            config: getAIConfig(),
           }),
         });
 
@@ -104,19 +107,14 @@ export default function Home() {
           },
           body: JSON.stringify({
             content: data.text,
-            config: {
-              useAI: true,
-              providers: [{ name: 'mock' }],
-              includeInternal: true,
-              weights: {
-                internal: 0.5,
-                ai: 0.5,
-              },
-            },
+            config: getAIConfig(),
           }),
         });
 
         const aiData = await aiResponse.json();
+        if (!aiResponse.ok) {
+          throw new Error(aiData.error || 'Failed to analyze with AI');
+        }
         setAnalysis(aiData.analysis);
         if (aiData.warning) {
           setAiWarning(aiData.warning);

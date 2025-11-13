@@ -17,8 +17,8 @@ AI Consensus Analysis combines the internal rule-based slop detection with insig
 
 The system supports multiple AI providers that can analyze content in parallel:
 
-- **OpenAI (GPT-4)** - Requires `OPENAI_API_KEY` environment variable
-- **Anthropic (Claude)** - Requires `ANTHROPIC_API_KEY` environment variable
+- **OpenAI (GPT-4o-mini)** - Requires `OPENAI_API_KEY` environment variable
+- **Anthropic (Claude 3 Haiku)** - Requires `ANTHROPIC_API_KEY` environment variable
 - **Mock Provider** - Built-in testing provider (no API key required)
 
 ### 2. Consensus Aggregation

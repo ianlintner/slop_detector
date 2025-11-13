@@ -331,7 +331,7 @@ Analyzes content with optional AI consensus. See [AI Consensus Guide](ai-consens
   content: string;  // Content to analyze
   config?: {
     useAI?: boolean;          // Enable AI consensus (default: false)
-    providers?: AIProvider[]; // AI providers to use
+    providers?: AIProvider[]; // AI providers to use, e.g., [{ name: 'openai', apiKey?: 'sk-...' }]
     includeInternal?: boolean; // Include internal score (default: true)
     weights?: {
       internal?: number;      // Weight for internal score (default: 0.5)
