@@ -425,6 +425,7 @@ The project uses **GitHub Actions** for automated quality checks:
 - ✅ **Formatting** - Prettier for consistent style
 - ✅ **Testing** - Jest for unit and integration tests
 - ✅ **Building** - Ensures production build succeeds
+- ✅ **Documentation** - Validates MkDocs documentation builds successfully
 - ✅ **Coverage** - Code coverage reporting with Codecov
 
 All checks must pass before merging pull requests.
