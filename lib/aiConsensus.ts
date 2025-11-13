@@ -227,8 +227,10 @@ export function createSlopAnalysisPrompt(content: string): string {
     ? content.substring(0, maxLength) + '...[truncated]'
     : content;
   
-  // Escape triple quotes to prevent breaking the prompt structure
-  const sanitizedContent = truncatedContent.replace(/"""/g, '\\"""');
+  // Escape triple quotes and backslashes to prevent breaking the prompt structure
+  const sanitizedContent = truncatedContent
+    .replace(/\\/g, '\\\\')  // Escape backslashes first
+    .replace(/"""/g, '\\"""'); // Then escape triple quotes
   
   return `Analyze the following content for "slop" characteristics - low-effort, repetitive, AI-generated, clickbait, or spammy content.
 
