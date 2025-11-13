@@ -35,14 +35,15 @@ The Slop Detector interface consists of two main analysis modes:
 Let's analyze a sample text:
 
 ```
-You won't believe this shocking revelation! In today's digital age, 
-it's important to note that this revolutionary solution will literally 
-change everything. This comprehensive guide will delve into the 
-ultimate secrets that doctors don't want you to know. Basically, 
+You won't believe this shocking revelation! In today's digital age,
+it's important to note that this revolutionary solution will literally
+change everything. This comprehensive guide will delve into the
+ultimate secrets that doctors don't want you to know. Basically,
 this is a game-changer that will unlock incredible benefits!
 ```
 
 **Expected Results:**
+
 - High clickbait score (phrases like "You won't believe", "shocking", "don't want you to know")
 - Elevated AI-generated score (phrases like "In today's digital age", "delve into", "comprehensive guide")
 - Moderate fluff score (words like "basically", "literally")
@@ -76,10 +77,7 @@ this is a game-changer that will unlock incredible benefits!
    - Check which characteristics are present
    - Review specific examples found in the transcript
 
-!!! warning "Video Limitations"
-    - Videos without captions cannot be analyzed
-    - Private or age-restricted videos may not work
-    - Very long videos (>2 hours) may take longer to process
+!!! warning "Video Limitations" - Videos without captions cannot be analyzed - Private or age-restricted videos may not work - Very long videos (>2 hours) may take longer to process
 
 ## Understanding the Results
 
@@ -88,30 +86,36 @@ this is a game-changer that will unlock incredible benefits!
 The overall slop score is calculated as a weighted average:
 
 ```
-Score = (Repetitiveness × 0.25) + 
-        (AI-Generated × 0.25) + 
-        (Clickbait × 0.20) + 
-        (Low Effort × 0.15) + 
+Score = (Repetitiveness × 0.25) +
+        (AI-Generated × 0.25) +
+        (Clickbait × 0.20) +
+        (Low Effort × 0.15) +
         (Fluff × 0.15)
 ```
 
 ### Factor Breakdown
 
 #### Repetitiveness (25% weight)
+
 Detects:
+
 - Words repeated more than 5 times
 - Sentences that appear multiple times
 - Excessive use of the same phrases
 
 **Example Detection:**
+
 ```
-"This product is amazing. This product is amazing. 
+"This product is amazing. This product is amazing.
 This product will change your life."
 ```
+
 → High repetitiveness due to repeated sentence
 
 #### AI-Generated (25% weight)
+
 Identifies common AI writing patterns:
+
 - "delve into", "dive deep"
 - "it's important to note"
 - "in today's digital age"
@@ -120,50 +124,64 @@ Identifies common AI writing patterns:
 - And more...
 
 **Example Detection:**
+
 ```
-"Let's delve into this comprehensive guide to unlock 
+"Let's delve into this comprehensive guide to unlock
 the secrets of this revolutionary approach."
 ```
+
 → Multiple AI-typical phrases detected
 
 #### Clickbait (20% weight)
+
 Catches clickbait patterns:
+
 - "you won't believe"
 - "shocking", "this one trick"
 - "doctors hate", "secrets"
 - Excessive exclamation marks (>5)
 
 **Example Detection:**
+
 ```
 "You won't believe these 7 shocking secrets!!!"
 ```
+
 → Multiple clickbait patterns and excessive punctuation
 
 #### Low Effort (15% weight)
+
 Detects:
+
 - Very short content (<50 words)
 - Unusually long sentences (>50 words average)
 - Lack of proper sentence structure
 
 **Example Detection:**
+
 ```
-"This is a product it does things and you should buy it 
+"This is a product it does things and you should buy it
 because it's good and will help you with stuff and things."
 ```
+
 → Long run-on sentence without proper structure
 
 #### Fluff (15% weight)
+
 Identifies excessive filler words:
+
 - "basically", "literally", "actually"
 - "honestly", "you know", "like"
 - "sort of", "kind of"
 - "um", "uh"
 
 **Example Detection:**
+
 ```
-"So basically, this is like, literally the best thing, 
+"So basically, this is like, literally the best thing,
 you know, that you can actually get, honestly."
 ```
+
 → High density of filler words
 
 ## Tips for Better Content
@@ -198,21 +216,25 @@ Based on the analysis, here are ways to improve your content:
 ## Use Cases
 
 ### Content Creation
+
 - Review blog posts before publishing
 - Check marketing copy for quality issues
 - Verify social media content
 
 ### Content Curation
+
 - Evaluate third-party content quality
 - Screen submissions or guest posts
 - Assess competitor content
 
 ### Education
+
 - Teach students about content quality
 - Demonstrate good vs. bad writing practices
 - Analyze AI-generated content
 
 ### Research
+
 - Study content quality trends
 - Analyze platform-specific content patterns
 - Track content degradation over time

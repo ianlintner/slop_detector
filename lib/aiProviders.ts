@@ -19,7 +19,7 @@ export async function analyzeWithOpenAI(
   apiKey?: string
 ): Promise<AIAnalysisResult> {
   const key = apiKey || process.env.OPENAI_API_KEY;
-  
+
   if (!key) {
     throw new Error('OpenAI API key not configured');
   }
@@ -31,14 +31,15 @@ export async function analyzeWithOpenAI(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${key}`,
+        Authorization: `Bearer ${key}`,
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini', // Using cost-effective model
         messages: [
           {
             role: 'system',
-            content: 'You are an expert content quality analyzer. Analyze content for slop characteristics and respond only with valid JSON.',
+            content:
+              'You are an expert content quality analyzer. Analyze content for slop characteristics and respond only with valid JSON.',
           },
           {
             role: 'user',
@@ -51,7 +52,9 @@ export async function analyzeWithOpenAI(
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `OpenAI API error: ${response.status} ${response.statusText}`
+      );
     }
 
     const data = await response.json();
@@ -69,7 +72,9 @@ export async function analyzeWithOpenAI(
     try {
       aiResponse = JSON.parse(data.choices[0].message.content);
     } catch (parseError) {
-      throw new Error(`Failed to parse OpenAI response as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to parse OpenAI response as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`
+      );
     }
     // Validate required fields
     if (typeof aiResponse.score !== 'number') {
@@ -98,7 +103,7 @@ export async function analyzeWithAnthropic(
   apiKey?: string
 ): Promise<AIAnalysisResult> {
   const key = apiKey || process.env.ANTHROPIC_API_KEY;
-  
+
   if (!key) {
     throw new Error('Anthropic API key not configured');
   }
@@ -126,7 +131,9 @@ export async function analyzeWithAnthropic(
     });
 
     if (!response.ok) {
-      throw new Error(`Anthropic API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Anthropic API error: ${response.status} ${response.statusText}`
+      );
     }
 
     const data = await response.json();
@@ -139,7 +146,7 @@ export async function analyzeWithAnthropic(
       throw new Error('Invalid response structure from Anthropic API');
     }
     const textContent = data.content[0].text;
-    
+
     // Extract JSON from response (Claude might include additional text)
     // Use non-greedy approach to avoid capturing multiple JSON objects
     const jsonStart = textContent.indexOf('{');
@@ -148,12 +155,14 @@ export async function analyzeWithAnthropic(
       throw new Error('Could not find JSON object in Anthropic response');
     }
     const jsonStr = textContent.substring(jsonStart, jsonEnd + 1);
-    
+
     let aiResponse;
     try {
       aiResponse = JSON.parse(jsonStr);
     } catch (parseError) {
-      throw new Error(`Failed to parse Anthropic response as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to parse Anthropic response as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`
+      );
     }
 
     if (typeof aiResponse.score !== 'number') {
@@ -181,19 +190,21 @@ export async function analyzeWithMock(
   content: string
 ): Promise<AIAnalysisResult> {
   // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
   // Simple heuristic-based mock analysis
   const words = content.split(/\s+/).length;
-  const hasAIPhrases = /delve into|dive deep|comprehensive guide/i.test(content);
+  const hasAIPhrases = /delve into|dive deep|comprehensive guide/i.test(
+    content
+  );
   const hasClickbait = /you won't believe|shocking/i.test(content);
-  
+
   let score = 30; // Base score
-  
+
   if (hasAIPhrases) score += 20;
   if (hasClickbait) score += 25;
   if (words < 50) score += 15;
-  
+
   score = Math.min(score, 100);
 
   return {
@@ -229,15 +240,15 @@ export const PROVIDER_IMPLEMENTATIONS: Record<
  */
 export function getAvailableProviders(): string[] {
   const providers: string[] = ['mock']; // Mock is always available
-  
+
   if (process.env.OPENAI_API_KEY) {
     providers.push('openai');
   }
-  
+
   if (process.env.ANTHROPIC_API_KEY) {
     providers.push('anthropic');
   }
-  
+
   return providers;
 }
 
@@ -249,15 +260,17 @@ export async function analyzeWithNamedProvider(
   provider: AIProvider
 ): Promise<AIAnalysisResult> {
   const providerName = provider.name.toLowerCase();
-  
+
   // Validate provider name against allowed list to prevent code injection
   const allowedProviders = Object.keys(PROVIDER_IMPLEMENTATIONS);
   if (!allowedProviders.includes(providerName)) {
     // Sanitize provider name for error message to prevent injection
     const sanitizedName = provider.name.replace(/[^a-zA-Z0-9-_]/g, '');
-    throw new Error(`Unknown provider: ${sanitizedName}. Available providers: ${allowedProviders.join(', ')}`);
+    throw new Error(
+      `Unknown provider: ${sanitizedName}. Available providers: ${allowedProviders.join(', ')}`
+    );
   }
-  
+
   const implementation = PROVIDER_IMPLEMENTATIONS[providerName];
   return implementation(content, provider.apiKey);
 }

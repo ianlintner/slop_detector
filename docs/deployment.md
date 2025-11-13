@@ -22,16 +22,19 @@ Vercel is the easiest and recommended way to deploy Slop Detector, as it's built
 ### Manual Deployment
 
 1. **Install Vercel CLI**
+
    ```bash
    npm install -g vercel
    ```
 
 2. **Login to Vercel**
+
    ```bash
    vercel login
    ```
 
 3. **Deploy**
+
    ```bash
    cd slop_detector
    vercel
@@ -80,16 +83,19 @@ No environment variables are required for basic functionality. If needed:
 ### Using Netlify CLI
 
 1. **Install Netlify CLI**
+
    ```bash
    npm install -g netlify-cli
    ```
 
 2. **Login**
+
    ```bash
    netlify login
    ```
 
 3. **Initialize**
+
    ```bash
    netlify init
    ```
@@ -180,7 +186,7 @@ services:
   slop-detector:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=production
     restart: unless-stopped
@@ -204,7 +210,7 @@ docker-compose up -d
 For standalone output (recommended for Docker):
 
 ```typescript
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -225,11 +231,13 @@ export default nextConfig;
 ### Using PM2
 
 1. **Install PM2**
+
    ```bash
    npm install -g pm2
    ```
 
 2. **Build the Application**
+
    ```bash
    cd slop_detector
    npm install
@@ -237,11 +245,13 @@ export default nextConfig;
    ```
 
 3. **Start with PM2**
+
    ```bash
    pm2 start npm --name "slop-detector" -- start
    ```
 
 4. **Save PM2 Configuration**
+
    ```bash
    pm2 save
    pm2 startup
@@ -277,6 +287,7 @@ server {
 ```
 
 Enable the site:
+
 ```bash
 sudo ln -s /etc/nginx/sites-available/slop-detector /etc/nginx/sites-enabled/
 sudo nginx -t
@@ -313,6 +324,7 @@ WantedBy=multi-user.target
 ```
 
 Enable and start:
+
 ```bash
 sudo systemctl enable slop-detector
 sudo systemctl start slop-detector
@@ -324,6 +336,7 @@ sudo systemctl status slop-detector
 ### Build Optimization
 
 1. **Enable SWC Minification** (default in Next.js 16)
+
    ```typescript
    // next.config.ts
    const nextConfig: NextConfig = {
@@ -336,6 +349,7 @@ sudo systemctl status slop-detector
    - Ensure images are in `public/` directory
 
 3. **Analyze Bundle Size**
+
    ```bash
    npm install -D @next/bundle-analyzer
    ```
@@ -350,6 +364,7 @@ sudo systemctl status slop-detector
    ```
 
    Run analysis:
+
    ```bash
    ANALYZE=true npm run build
    ```
@@ -357,6 +372,7 @@ sudo systemctl status slop-detector
 ### Performance Monitoring
 
 1. **Vercel Analytics**
+
    ```bash
    npm install @vercel/analytics
    ```
@@ -450,24 +466,28 @@ npm audit fix
 ### Build Failures
 
 **Error: Out of memory**
+
 ```bash
 # Increase Node memory limit
 NODE_OPTIONS="--max-old-space-size=4096" npm run build
 ```
 
 **Error: Module not found**
+
 - Ensure all dependencies are in `package.json`
 - Run `npm install` before building
 
 ### Runtime Issues
 
 **Port already in use**
+
 ```bash
 # Change port
 PORT=3001 npm start
 ```
 
 **Environment variables not working**
+
 - Ensure variables are prefixed with `NEXT_PUBLIC_` for client-side access
 - Restart server after changing variables
 
@@ -481,11 +501,13 @@ PORT=3001 npm start
 ## Rollback Strategy
 
 ### Vercel
+
 - Go to Deployments
 - Click "..." on previous deployment
 - Select "Promote to Production"
 
 ### Docker
+
 ```bash
 # Tag previous version
 docker tag slop-detector:latest slop-detector:v1.0
@@ -496,6 +518,7 @@ docker run -p 3000:3000 slop-detector:v1.0
 ```
 
 ### PM2
+
 ```bash
 pm2 stop slop-detector
 # Restore previous code
@@ -505,6 +528,7 @@ pm2 start slop-detector
 ## Support
 
 For deployment issues:
+
 - Check [Next.js Deployment Docs](https://nextjs.org/docs/deployment)
 - Review platform-specific documentation
 - Open an issue on GitHub

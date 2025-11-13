@@ -22,27 +22,31 @@ cd slop_detector
 ### 2. Install Dependencies
 
 Using npm:
+
 ```bash
 npm install
 ```
 
 Or using yarn:
+
 ```bash
 yarn install
 ```
 
 Or using pnpm:
+
 ```bash
 pnpm install
 ```
 
 Or using bun:
+
 ```bash
 bun install
 ```
 
 !!! info "Installation Time"
-    The installation process typically takes 1-2 minutes depending on your internet connection.
+The installation process typically takes 1-2 minutes depending on your internet connection.
 
 ## Running the Application
 
@@ -55,6 +59,7 @@ npm run dev
 ```
 
 Or with your preferred package manager:
+
 ```bash
 yarn dev
 # or
@@ -66,7 +71,7 @@ bun dev
 The application will be available at [http://localhost:3000](http://localhost:3000).
 
 !!! tip "Hot Reload"
-    The development server includes hot reload, so changes you make to the code will automatically reflect in your browser.
+The development server includes hot reload, so changes you make to the code will automatically reflect in your browser.
 
 ### Production Build
 
@@ -117,7 +122,7 @@ Slop Detector doesn't require any environment variables for basic functionality.
 The Next.js configuration is stored in `next.config.ts`. The default configuration works for most use cases:
 
 ```typescript
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */

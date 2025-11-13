@@ -19,30 +19,36 @@ Slop Detector is a Next.js application that analyzes content for "slop" - low-ef
 ## Key Features
 
 ### 📝 Text Analysis
+
 Paste any text content directly to analyze it for slop characteristics. Perfect for:
+
 - Blog posts and articles
 - Social media content
 - Marketing copy
 - Product descriptions
 
 ### 🎥 YouTube Analysis
+
 Enter a YouTube URL to analyze video transcripts/captions for slop. Great for:
+
 - Video content quality assessment
 - Educational content verification
 - Marketing video analysis
 
 ### 📊 Custom Slop Score
+
 Get a comprehensive 0-100 score based on multiple factors:
 
-| Factor | Weight | Description |
-|--------|--------|-------------|
-| **Repetitiveness** | 25% | Detects repeated words, phrases, and sentences |
-| **AI-Generated** | 25% | Identifies common AI writing patterns and phrases |
-| **Clickbait** | 20% | Catches clickbait headlines and excessive punctuation |
-| **Low Effort** | 15% | Detects poor structure and padding |
-| **Fluff** | 15% | Identifies excessive filler words and phrases |
+| Factor             | Weight | Description                                           |
+| ------------------ | ------ | ----------------------------------------------------- |
+| **Repetitiveness** | 25%    | Detects repeated words, phrases, and sentences        |
+| **AI-Generated**   | 25%    | Identifies common AI writing patterns and phrases     |
+| **Clickbait**      | 20%    | Catches clickbait headlines and excessive punctuation |
+| **Low Effort**     | 15%    | Detects poor structure and padding                    |
+| **Fluff**          | 15%    | Identifies excessive filler words and phrases         |
 
 ### 🔍 Detailed Breakdown
+
 See exactly what issues were detected in the content with specific examples and counts.
 
 ## Score Ratings
