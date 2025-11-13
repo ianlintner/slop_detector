@@ -42,6 +42,17 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install documentation dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build documentation
+        run: mkdocs build
+
       - name: Upload coverage
         if: success()
         uses: codecov/codecov-action@v4

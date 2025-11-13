@@ -2,9 +2,30 @@
 
 Welcome to the **Slop Detector** documentation! 🔍
 
+![Slop Detector Application](https://github.com/user-attachments/assets/41fb8a7a-62c3-4b4a-9f2f-66a09c38f161)
+
 ## Overview
 
 Slop Detector is a Next.js application that analyzes content for "slop" - low-effort, repetitive, AI-generated, or spammy characteristics. Get a custom slop score that measures how likely content is to be clickbait, hiding the lede, or using dark patterns to generate quick money online.
+
+## Application Screenshots
+
+### Text Content Analysis
+
+
+The main interface provides an intuitive text input for analyzing any content you want to check for slop characteristics.
+
+### YouTube Video Analysis
+
+![YouTube Analysis Interface](https://github.com/user-attachments/assets/31caf591-e47f-4e8e-96ba-498404e320b2)
+
+Analyze YouTube video transcripts by simply pasting the video URL. The app automatically fetches and analyzes the captions.
+
+### Detailed Results
+
+![Analysis Results](https://github.com/user-attachments/assets/702fe16e-3785-4791-a949-54f165347d12)
+
+Get comprehensive results showing your slop score, factor breakdown, and specific issues detected in the content.
 
 ## What is "Slop"?
 
