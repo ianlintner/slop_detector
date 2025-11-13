@@ -7,16 +7,19 @@ A Next.js application that analyzes content for "slop" - low-effort, repetitive,
 ## 📸 Screenshots
 
 ### Main Interface - Text Analysis
+
 The primary interface allows you to paste any text content for immediate analysis:
 
 ![Text Analysis Interface](https://github.com/user-attachments/assets/41fb8a7a-62c3-4b4a-9f2f-66a09c38f161)
 
 ### YouTube URL Analysis
+
 Analyze video transcripts directly from YouTube URLs:
 
 ![YouTube Analysis Interface](https://github.com/user-attachments/assets/31caf591-e47f-4e8e-96ba-498404e320b2)
 
 ### Analysis Results
+
 Get detailed breakdowns with scores for each factor:
 
 ![Analysis Results](https://github.com/user-attachments/assets/702fe16e-3785-4791-a949-54f165347d12)
@@ -33,13 +36,13 @@ Get detailed breakdowns with scores for each factor:
 
 Get a custom **0-100 slop score** based on five key factors:
 
-| Factor | Weight | What It Detects |
-|--------|--------|-----------------|
-| 🔄 **Repetitiveness** | 25% | Repeated words, phrases, and sentences |
-| 🤖 **AI-Generated** | 25% | Common AI writing patterns and overused phrases |
-| 🎣 **Clickbait** | 20% | Sensationalist headlines and excessive punctuation |
-| 📉 **Low Effort** | 15% | Poor structure, padding, and minimal content |
-| 💬 **Fluff** | 15% | Excessive filler words and phrases |
+| Factor                | Weight | What It Detects                                    |
+| --------------------- | ------ | -------------------------------------------------- |
+| 🔄 **Repetitiveness** | 25%    | Repeated words, phrases, and sentences             |
+| 🤖 **AI-Generated**   | 25%    | Common AI writing patterns and overused phrases    |
+| 🎣 **Clickbait**      | 20%    | Sensationalist headlines and excessive punctuation |
+| 📉 **Low Effort**     | 15%    | Poor structure, padding, and minimal content       |
+| 💬 **Fluff**          | 15%    | Excessive filler words and phrases                 |
 
 ### 📊 Detailed Analysis Results
 
@@ -58,23 +61,26 @@ Get a custom **0-100 slop score** based on five key factors:
 ### Installation & Running
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/ianlintner/slop_detector.git
    cd slop_detector
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Start the development server**
+
    ```bash
    npm run dev
    ```
 
 4. **Open your browser**
-   
+
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 That's it! 🎉 You're ready to start analyzing content for slop.
@@ -120,24 +126,26 @@ See the [AI Consensus Documentation](docs/ai-consensus.md) for setup and configu
 
 The slop score ranges from 0 to 100, with higher scores indicating lower quality content:
 
-| Score Range | Rating | Description | Color |
-|-------------|--------|-------------|-------|
-| 0-19 | 🟢 **Minimal Slop** | High quality, well-crafted content | Green |
-| 20-39 | 🔵 **Low Slop** | Generally good with minor issues | Blue |
-| 40-59 | 🟡 **Moderate Slop** | Noticeable quality concerns | Yellow |
-| 60-79 | 🟠 **High Slop** | Significant quality issues | Orange |
-| 80-100 | 🔴 **Extreme Slop** | Very low quality, likely spam/clickbait | Red |
+| Score Range | Rating               | Description                             | Color  |
+| ----------- | -------------------- | --------------------------------------- | ------ |
+| 0-19        | 🟢 **Minimal Slop**  | High quality, well-crafted content      | Green  |
+| 20-39       | 🔵 **Low Slop**      | Generally good with minor issues        | Blue   |
+| 40-59       | 🟡 **Moderate Slop** | Noticeable quality concerns             | Yellow |
+| 60-79       | 🟠 **High Slop**     | Significant quality issues              | Orange |
+| 80-100      | 🔴 **Extreme Slop**  | Very low quality, likely spam/clickbait | Red    |
 
 ### Example Analysis
 
 **Input Text:**
+
 ```
-You won't believe this shocking revelation! In today's digital age, 
-it's important to note that this revolutionary solution will literally 
+You won't believe this shocking revelation! In today's digital age,
+it's important to note that this revolutionary solution will literally
 change everything.
 ```
 
 **Results:**
+
 - Overall Score: **39/100** (Low Slop)
 - AI-Generated: 75/100 (phrases like "in today's digital age", "it's important to note")
 - Clickbait: 50/100 (patterns like "You won't believe", "shocking")
@@ -179,7 +187,7 @@ slop_detector/
 │   ├── deployment.md
 │   └── contributing.md
 ├── public/                # Static assets
-├── .github/              
+├── .github/
 │   └── workflows/        # CI/CD pipelines
 └── mkdocs.yml            # Documentation configuration
 ```
@@ -321,6 +329,7 @@ Comprehensive documentation is available using MkDocs with Material theme.
 To view the full documentation site locally:
 
 1. **Install MkDocs** (one-time setup):
+
    ```bash
    pip install -r requirements.txt
    # or
@@ -328,6 +337,7 @@ To view the full documentation site locally:
    ```
 
 2. **Serve documentation**:
+
    ```bash
    mkdocs serve
    # or
@@ -337,6 +347,7 @@ To view the full documentation site locally:
 3. **Open** [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser
 
 The documentation site includes:
+
 - 📱 Responsive design for mobile and desktop
 - 🌓 Light/dark mode toggle
 - 🔍 Full-text search
@@ -376,6 +387,7 @@ Deploy with one click:
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ianlintner/slop_detector)
 
 Or use the Vercel CLI:
+
 ```bash
 npm install -g vercel
 vercel
@@ -384,7 +396,7 @@ vercel
 ### Other Deployment Options
 
 - **Netlify** - JAMstack platform with Git integration
-- **Docker** - Containerized deployment for any environment  
+- **Docker** - Containerized deployment for any environment
 - **Self-hosted** - Deploy to your own server with PM2/systemd
 
 See the [Deployment Guide](docs/deployment.md) for detailed instructions for each platform.
@@ -399,6 +411,7 @@ We welcome contributions! Whether it's:
 - 🧪 Test coverage improvements
 
 See our [Contributing Guide](docs/contributing.md) for details on:
+
 - Development workflow
 - Coding standards
 - Pull request process
