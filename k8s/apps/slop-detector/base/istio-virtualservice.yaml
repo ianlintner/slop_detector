@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: slop-detector-virtualservice
+  namespace: default
+  labels:
+    app: slop-detector
+spec:
+  hosts:
+    - "slop.cat-herding.net"
+  gateways:
+    - slop-detector-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: slop-detector
+            port:
+              number: 80
+      # Optional: Add timeout and retry policies
+      timeout: 30s
+      retries:
+        attempts: 3
+        perTryTimeout: 10s
+        retryOn: "5xx,reset,connect-failure,refused-stream"

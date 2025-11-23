@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: slop-detector
+  labels:
+    app: slop-detector
+spec:
+  type: ClusterIP
+  selector:
+    app: slop-detector
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+      protocol: TCP
+  sessionAffinity: None

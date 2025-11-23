@@ -1,0 +1,13 @@
+# Kubernetes deployment files
+k8s/
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Local environment files (may contain secrets)
+.env*.local
+
+# Azure specific
+.azure/
