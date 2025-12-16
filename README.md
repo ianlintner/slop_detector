@@ -380,7 +380,19 @@ npm run docs:deploy
 
 Slop Detector can be deployed to various platforms. The easiest options are:
 
-### Vercel (Recommended)
+### Azure AKS with Istio (Production)
+
+Enterprise-grade Kubernetes deployment with optional OAuth2 authentication:
+
+```bash
+# Deploy to Azure AKS
+kubectl apply -k k8s/apps/slop-detector/base
+```
+
+- 📖 [Azure Deployment Guide](docs/azure-deployment.md)
+- 🔐 [OAuth2 Quick Reference](OAUTH2.md) - Azure AD authentication setup
+
+### Vercel (Quick Start)
 
 Deploy with one click:
 
