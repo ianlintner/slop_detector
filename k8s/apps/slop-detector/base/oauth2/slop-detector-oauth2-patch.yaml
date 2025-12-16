@@ -51,6 +51,6 @@ spec:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
-            secretProviderClass: "slop-detector-secrets-provider"
+            secretProviderClass: "slop-detector-secrets"
       - name: rendered-sds
         emptyDir: {}

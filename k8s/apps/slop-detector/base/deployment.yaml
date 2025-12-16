@@ -6,7 +6,7 @@ metadata:
     app: slop-detector
     version: v1
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: slop-detector
@@ -46,13 +46,6 @@ spec:
             #     secretKeyRef:
             #       name: slop-detector-secrets
             #       key: anthropic-api-key
-          resources:
-            requests:
-              cpu: 250m
-              memory: 512Mi
-            limits:
-              cpu: 1000m
-              memory: 1Gi
           livenessProbe:
             httpGet:
               path: /health

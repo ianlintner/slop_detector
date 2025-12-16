@@ -8,8 +8,9 @@ metadata:
 spec:
   hosts:
     - "slop.cat-herding.net"
+    - "slop-detector.cat-herding.net"
   gateways:
-    - slop-detector-gateway
+  - aks-istio-ingress/cat-herding-gateway
   http:
     - match:
         - uri:
