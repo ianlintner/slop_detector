@@ -16,8 +16,10 @@ spec:
         app: slop-detector
         version: v1
       annotations:
-        sidecar.istio.io/inject: "false"
+        sidecar.istio.io/inject: "true"
     spec:
+      imagePullSecrets:
+        - name: acr-secret
       containers:
         - name: slop-detector
           image: gabby.azurecr.io/slop-detector:latest
@@ -31,6 +33,8 @@ spec:
               value: "production"
             - name: PORT
               value: "3000"
+            - name: ENVIRONMENT
+              value: "k8s"
             # Optional: AI provider API keys (use secrets in production)
             # - name: OPENAI_API_KEY
             #   valueFrom:

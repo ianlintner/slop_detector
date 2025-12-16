@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slop-detector-oauth2-sds
+  namespace: default
+data:
+  sds-template.yaml: |
+    # This is a template file for SDS (Secret Discovery Service) configuration
+    # The actual secrets will be rendered by the init container
+    # See slop-detector-oauth2-patch.yaml for the rendering logic

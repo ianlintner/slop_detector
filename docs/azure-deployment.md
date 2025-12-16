@@ -536,6 +536,72 @@ az network dns record-set a delete \
   --yes
 ```
 
+## OAuth2 Integration (Optional)
+
+The Slop Detector supports OAuth2 authentication via Azure AD integration at the Istio service mesh level. This provides enterprise-grade authentication without modifying application code.
+
+### Overview
+
+- Authentication is handled by Istio Envoy sidecar
+- Secrets are stored in Azure Key Vault
+- CSI Secret Store Driver mounts secrets into pods
+- Init container dynamically generates SDS configuration
+
+### Quick Setup
+
+```bash
+# 1. Create Azure AD App Registration
+az ad app create --display-name "slop-detector" \
+  --sign-in-audience "AzureADMyOrg" \
+  --web-redirect-uris "https://slop.cat-herding.net/oauth2/callback"
+
+# Note the Application (client) ID and create a client secret
+APP_ID="<client-id-from-above>"
+CLIENT_SECRET=$(az ad app credential reset --id $APP_ID --query password -o tsv)
+
+# 2. Store secrets in Azure Key Vault
+KEYVAULT_NAME="<your-keyvault-name>"
+HMAC_SECRET=$(openssl rand -base64 32)
+
+az keyvault secret set --vault-name $KEYVAULT_NAME \
+  --name slop-detector-client-secret --value "$CLIENT_SECRET"
+
+az keyvault secret set --vault-name $KEYVAULT_NAME \
+  --name slop-detector-oauth-hmac-secret --value "$HMAC_SECRET"
+
+# 3. Configure SecretProviderClass
+# Edit k8s/apps/slop-detector/base/oauth2-secretproviderclass.yaml
+# Set: userAssignedIdentityID, keyvaultName, tenantId
+
+# 4. Configure EnvoyFilter
+# Edit k8s/apps/slop-detector/base/oauth2-envoyfilter.yaml
+# Replace: {tenant-id}, {client-id}
+
+# 5. Deploy with OAuth2
+kubectl apply -k k8s/apps/slop-detector/base
+```
+
+### Detailed Documentation
+
+For complete OAuth2 setup instructions, troubleshooting, and architecture details, see:
+
+📁 [`k8s/apps/slop-detector/base/oauth2/README.md`](../k8s/apps/slop-detector/base/oauth2/README.md)
+
+### Disabling OAuth2
+
+To deploy without authentication, edit `kustomization.yaml` and comment out:
+```yaml
+# patchesStrategicMerge:
+#   - oauth2/slop-detector-oauth2-patch.yaml
+```
+
+And remove OAuth2 resources:
+```yaml
+# - oauth2-secretproviderclass.yaml
+# - oauth2-configmap.yaml
+# - oauth2-envoyfilter.yaml
+```
+
 ## Security Best Practices
 
 1. **Use specific image tags** instead of `:latest` in production
@@ -546,10 +612,14 @@ az network dns record-set a delete \
 6. **Enable Istio mTLS** for service-to-service encryption
 7. **Configure resource limits** to prevent resource exhaustion
 8. **Use Azure Key Vault** for sensitive configuration (via CSI driver)
+9. **Enable OAuth2 authentication** for production deployments (see OAuth2 section above)
+10. **Rotate OAuth2 secrets regularly** (client secret and HMAC secret)
 
 ## Additional Resources
 
 - [Azure AKS Documentation](https://learn.microsoft.com/azure/aks/)
 - [Istio Documentation](https://istio.io/latest/docs/)
+- [Istio OAuth2 Filter](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/oauth2_filter)
+- [Azure Key Vault CSI Driver](https://azure.github.io/secrets-store-csi-driver-provider-azure/)
 - [Next.js Deployment](https://nextjs.org/docs/deployment)
 - [Kubernetes Best Practices](https://kubernetes.io/docs/concepts/configuration/overview/)

@@ -8,6 +8,12 @@ resources:
   - service.yaml
   - istio-gateway.yaml
   - istio-virtualservice.yaml
+  - oauth2-secretproviderclass.yaml
+  - oauth2-configmap.yaml
+  - oauth2-envoyfilter.yaml
+
+patchesStrategicMerge:
+  - oauth2/slop-detector-oauth2-patch.yaml
 
 commonLabels:
   app: slop-detector
