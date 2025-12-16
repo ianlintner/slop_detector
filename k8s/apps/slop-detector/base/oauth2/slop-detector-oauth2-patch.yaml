@@ -46,5 +46,11 @@ spec:
         - name: rendered-sds
           mountPath: "/etc/istio/oauth2"
       volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "slop-detector-secrets-provider"
       - name: rendered-sds
         emptyDir: {}
