@@ -53,6 +53,25 @@ Rolls back to previous deployment version.
 ./scripts/rollback.sh --revision 3
 ```
 
+### validate-oauth2.sh
+
+Validates OAuth2 configuration before deployment.
+
+```bash
+# Validate OAuth2 setup
+./scripts/validate-oauth2.sh
+```
+
+This script checks:
+- Kustomization includes OAuth2 patch
+- SecretProviderClass configuration
+- EnvoyFilter configuration
+- Kubernetes connectivity and required components
+- Azure Key Vault and secrets
+- Kustomize configuration validity
+
+Use this before deploying with OAuth2 to catch configuration issues early.
+
 ## Usage
 
 Make scripts executable:
