@@ -99,7 +99,7 @@ spec:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
-            secretProviderClass: "slop-detector-secrets"
+            secretProviderClass: "slop-detector-secrets-provider"
       - name: slop-detector-oauth2-sds-template
         configMap:
           name: slop-detector-oauth2-sds
