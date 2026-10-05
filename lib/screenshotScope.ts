@@ -42,8 +42,10 @@ export function parseAssessment(value: unknown, requested: Scope): Assessment {
   const target = v.target;
   const verdict = v.verdict;
   if (
-    !['image', 'article', 'whole', 'unknown'].includes(String(target)) ||
-    !['slop', 'not_slop', 'uncertain'].includes(String(verdict)) ||
+    typeof target !== 'string' ||
+    !['image', 'article', 'whole', 'unknown'].includes(target) ||
+    typeof verdict !== 'string' ||
+    !['slop', 'not_slop', 'uncertain'].includes(verdict) ||
     typeof v.reason !== 'string' ||
     v.reason.length > 1000 ||
     !v.reason.trim() ||

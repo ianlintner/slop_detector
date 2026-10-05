@@ -45,6 +45,12 @@ describe('screenshot scope contract', () => {
       parseAssessment({ ...valid, evidence: ['x'.repeat(301)] }, 'auto')
     ).toThrow();
     expect(() => parseAssessment({ ...valid, reason: '' }, 'auto')).toThrow();
+    expect(() =>
+      parseAssessment({ ...valid, target: ['image'] }, 'auto')
+    ).toThrow();
+    expect(() =>
+      parseAssessment({ ...valid, verdict: ['slop'] }, 'auto')
+    ).toThrow();
     expect(
       parseAssessment({ ...valid, injected: '<script>', score: 99 }, 'image')
     ).toEqual(valid);
