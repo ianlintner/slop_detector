@@ -59,7 +59,13 @@ export function parseAssessment(value: unknown, requested: Scope): Assessment {
   ) {
     throw new Error('Invalid assessment');
   }
-  const result = v as Assessment;
+  const result: Assessment = {
+    target: target as Target,
+    verdict: verdict as Verdict,
+    reason: v.reason as string,
+    evidence: v.evidence as string[],
+    question: v.question as string | null,
+  };
   // A model cannot silently substitute a different subject for an explicit selection.
   if (
     requested !== 'auto' &&

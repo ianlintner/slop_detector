@@ -42,11 +42,20 @@ export default function ScreenshotAnalyzer() {
         method: 'POST',
         body: form,
       });
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json'))
+        throw new Error('Analysis service returned an unexpected response.');
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Analysis failed');
       setResult(data.assessment);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Analysis failed');
+      setError(
+        err instanceof SyntaxError
+          ? 'Analysis service returned an invalid response.'
+          : err instanceof Error
+            ? err.message
+            : 'Analysis failed'
+      );
     } finally {
       setBusy(false);
     }
