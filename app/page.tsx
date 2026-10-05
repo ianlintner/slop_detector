@@ -7,6 +7,7 @@ import {
   getSlopColor,
 } from '@/lib/slopDetector';
 import { EnrichedSlopAnalysis } from '@/lib/aiConsensus';
+import ScreenshotAnalyzer from './ScreenshotAnalyzer';
 
 export default function Home() {
   const [inputType, setInputType] = useState<'text' | 'youtube'>('text');
@@ -163,6 +164,7 @@ export default function Home() {
           </p>
         </div>
 
+        <ScreenshotAnalyzer />
         {/* Input Type Selector */}
         <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg p-6 mb-6">
           <div className="flex gap-4 mb-6">

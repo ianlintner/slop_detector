@@ -1,5 +1,7 @@
 # 🔍 Slop Detector
 
+**New screenshot MVP:** upload a screenshot, choose image/article/whole-page scope or let the app ask when ambiguous. Requires server-side `OPENAI_API_KEY`, explicit upload consent, and a vision-capable OpenAI model. See [scope, privacy and run instructions](docs/screenshot-mvp.md). The screenshot verdict is not an AI-authorship claim. Text and YouTube flows below remain separate.
+
 A Next.js application that analyzes content for "slop" - low-effort, repetitive, AI-generated, or spammy characteristics. Get a custom slop score that measures how likely content is to be clickbait, hiding the lede, or using dark patterns to generate quick money online.
 
 ![Slop Detector Interface](https://github.com/user-attachments/assets/41fb8a7a-62c3-4b4a-9f2f-66a09c38f161)
