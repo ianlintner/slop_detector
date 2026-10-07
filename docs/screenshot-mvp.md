@@ -6,14 +6,14 @@ The existing text and YouTube tools remain available. The screenshot panel adds 
 
 ```bash
 npm ci
-OPENAI_API_KEY=your-server-side-key npm run dev
+OPENROUTER_API_KEY=your-server-side-key npm run dev
 # open http://localhost:3000
 npm test -- --runInBand
 npm run lint
 npm run build
 ```
 
-`SLOP_VISION_MODEL` optionally overrides the default `gpt-4.1-mini` (use a vision-capable OpenAI chat-completions model supporting JSON mode). The key is server-only; do not set `NEXT_PUBLIC_` on it. With no key, the screenshot API returns 503 rather than a mock verdict. The API never logs image bytes, context or provider response. The image and note go to OpenAI only after the user checks the consent box; do not upload confidential material. This is not a privacy-preserving deployment, and a public production deployment needs authentication, rate limiting and a spend cap before accepting strangers' uploads.
+The server pins `openai/gpt-4.1-mini` on OpenRouter to its OpenAI provider, disables provider fallbacks and asks OpenRouter to exclude data-collecting endpoints; it does not send screenshots to an arbitrary model or use `auto` routing. The OpenRouter key is server-only; do not set `NEXT_PUBLIC_` on it. With no key, the screenshot API returns 503 rather than a mock verdict. The API never logs image bytes, context or provider response. The image and note go to OpenRouter **and** the selected upstream OpenAI provider only after the user checks the consent box; do not upload confidential material. OpenRouter's own policies and the upstream provider's terms still apply; `data_collection: deny` is a routing preference, not a guarantee of zero retention by every intermediary. This is not a privacy-preserving deployment, and a public production deployment needs authentication, rate limiting and a spend cap before accepting strangers' uploads.
 
 ## Decision contract
 

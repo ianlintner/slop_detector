@@ -12,12 +12,12 @@ export const runtime = 'nodejs';
 const scopes: Scope[] = ['auto', 'image', 'article', 'whole'];
 
 export async function POST(request: NextRequest) {
-  const key = process.env.OPENAI_API_KEY;
+  const key = process.env.OPENROUTER_API_KEY;
   if (!key)
     return NextResponse.json(
       {
         error:
-          'Vision analysis is not configured. Set OPENAI_API_KEY on the server.',
+          'Vision analysis is not configured. Set OPENROUTER_API_KEY on the server.',
       },
       { status: 503 }
     );
@@ -93,41 +93,50 @@ export async function POST(request: NextRequest) {
       { error: 'Only genuine PNG, JPEG, or WebP images are supported.' },
       { status: 415 }
     );
-  const model = process.env.SLOP_VISION_MODEL || 'gpt-4.1-mini';
+  const model = 'openai/gpt-4.1-mini';
   try {
-    const upstream = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0,
-        max_tokens: 500,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: makePrompt(scope as Scope, context) },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Assess the selected visible content. If scope is ambiguous or text illegible, ask for clarification.',
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:${mime};base64,${Buffer.from(bytes).toString('base64')}`,
-                  detail: 'auto',
-                },
-              },
-            ],
+    const upstream = await fetch(
+      'https://openrouter.ai/api/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          provider: {
+            only: ['openai'],
+            allow_fallbacks: false,
+            data_collection: 'deny',
+            require_parameters: true,
           },
-        ],
-      }),
-      signal: AbortSignal.timeout(20000),
-    });
+          temperature: 0,
+          max_tokens: 500,
+          response_format: { type: 'json_object' },
+          messages: [
+            { role: 'system', content: makePrompt(scope as Scope, context) },
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Assess the selected visible content. If scope is ambiguous or text illegible, ask for clarification.',
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:${mime};base64,${Buffer.from(bytes).toString('base64')}`,
+                    detail: 'auto',
+                  },
+                },
+              ],
+            },
+          ],
+        }),
+        signal: AbortSignal.timeout(20000),
+      }
+    );
     if (!upstream.ok)
       return NextResponse.json(
         { error: 'Vision provider unavailable. Try again later.' },

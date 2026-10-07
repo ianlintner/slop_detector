@@ -116,8 +116,8 @@ export default function ScreenshotAnalyzer() {
             onChange={(e) => setConsent(e.target.checked)}
             className="mt-1"
           />{' '}
-          Send this screenshot and note to OpenAI for analysis. Do not upload
-          secrets or private content.
+          Send this screenshot and note to OpenRouter and its pinned OpenAI
+          provider for analysis. Do not upload secrets or private content.
         </label>
         <button
           disabled={busy}
