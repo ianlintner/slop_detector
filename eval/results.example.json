@@ -1,0 +1,51 @@
+[
+  {
+    "name": "hero-image-longform",
+    "group": "g1",
+    "difficulty": "easy",
+    "expected_scope": "image",
+    "predicted_scope": null
+  },
+  {
+    "name": "text-only-opinion",
+    "group": "g1",
+    "difficulty": "easy",
+    "expected_scope": "article",
+    "predicted_scope": null
+  },
+  {
+    "name": "gallery-page",
+    "group": "g1",
+    "difficulty": "easy",
+    "expected_scope": "image",
+    "predicted_scope": null
+  },
+  {
+    "name": "low-res-blurred",
+    "group": "g2",
+    "difficulty": "unclear",
+    "expected_scope": "auto",
+    "predicted_scope": null
+  },
+  {
+    "name": "cropped-half-image",
+    "group": "g2",
+    "difficulty": "unclear",
+    "expected_scope": "auto",
+    "predicted_scope": null
+  },
+  {
+    "name": "prompt-in-text",
+    "group": "g3",
+    "difficulty": "adversarial",
+    "expected_scope": "image",
+    "predicted_scope": null
+  },
+  {
+    "name": "invisible-instruction",
+    "group": "g3",
+    "difficulty": "adversarial",
+    "expected_scope": "article",
+    "predicted_scope": null
+  }
+]

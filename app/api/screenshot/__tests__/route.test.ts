@@ -1,11 +1,22 @@
 /** @jest-environment node */
 import { NextRequest } from 'next/server';
+import { resetAccessState } from '@/lib/accessControl';
 import { POST } from '../route';
 
 const png = Uint8Array.from([
-  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0, 0, 0, 0, 0,
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44,
+  0x52, 0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0,
 ]);
 const originalKey = process.env.OPENROUTER_API_KEY;
+
+const TEST_TOKEN = 'test-token-0123456789abcdef';
+const TEST_USER = 'test-user';
+
+beforeEach(() => {
+  process.env.SCREENSHOT_ACCESS_TOKENS = `${TEST_USER}:${TEST_TOKEN}`;
+  process.env.SCREENSHOT_DAILY_SPEND_CAP_USD = '100';
+  resetAccessState();
+});
 
 function request(consent = 'yes') {
   const form = new FormData();
@@ -16,12 +27,15 @@ function request(consent = 'yes') {
   return new NextRequest('http://localhost/api/screenshot', {
     method: 'POST',
     body: form,
+    headers: { authorization: `Bearer ${TEST_TOKEN}` },
   });
 }
 
 afterEach(() => {
   if (originalKey === undefined) delete process.env.OPENROUTER_API_KEY;
   else process.env.OPENROUTER_API_KEY = originalKey;
+  delete process.env.SCREENSHOT_ACCESS_TOKENS;
+  delete process.env.SCREENSHOT_DAILY_SPEND_CAP_USD;
   jest.restoreAllMocks();
 });
 
