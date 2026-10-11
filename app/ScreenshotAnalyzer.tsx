@@ -13,6 +13,7 @@ export default function ScreenshotAnalyzer() {
   const [scope, setScope] = useState<Scope>('auto');
   const [context, setContext] = useState('');
   const [consent, setConsent] = useState(false);
+  const [token, setToken] = useState('');
   const [result, setResult] = useState<Assessment | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -41,6 +42,7 @@ export default function ScreenshotAnalyzer() {
       const response = await fetch('/api/screenshot', {
         method: 'POST',
         body: form,
+        headers: token ? { authorization: `Bearer ${token}` } : undefined,
       });
       const contentType = response.headers.get('content-type') || '';
       if (!contentType.includes('application/json'))
@@ -107,6 +109,17 @@ export default function ScreenshotAnalyzer() {
             onChange={(e) => setContext(e.target.value)}
             className="block w-full mt-2 p-2 text-zinc-900 rounded border"
             placeholder="E.g. assess the large illustration, not the article"
+          />
+        </label>
+        <label className="block">
+          Access token
+          <input
+            type="password"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            className="block w-full mt-2 p-2 text-zinc-900 rounded border"
+            placeholder="Bearer token for this endpoint"
+            autoComplete="off"
           />
         </label>
         <label className="flex gap-2 items-start">

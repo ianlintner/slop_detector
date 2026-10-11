@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  detectImage,
+  authenticate,
+  checkRate,
+  loadAccessConfig,
+  reserveSpend,
+} from '@/lib/accessControl';
+import { inspectImage } from '@/lib/imageValidation';
+import {
   makePrompt,
   MAX_CONTEXT_CHARS,
   MAX_IMAGE_BYTES,
@@ -20,6 +26,25 @@ export async function POST(request: NextRequest) {
           'Vision analysis is not configured. Set OPENROUTER_API_KEY on the server.',
       },
       { status: 503 }
+    );
+  // Fail closed: no access configuration means no paid calls.
+  const access = loadAccessConfig(process.env);
+  if (typeof access === 'string')
+    return NextResponse.json(
+      { error: 'Screenshot access control is not configured on the server.' },
+      { status: 503 }
+    );
+  const user = authenticate(request.headers.get('authorization'), access);
+  if (!user)
+    return NextResponse.json(
+      { error: 'Authentication required.' },
+      { status: 401, headers: { 'WWW-Authenticate': 'Bearer' } }
+    );
+  const retryAfter = checkRate(user, access.ratePerHour);
+  if (retryAfter !== null)
+    return NextResponse.json(
+      { error: 'Rate limit exceeded. Try again later.' },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } }
     );
   const length = Number(request.headers.get('content-length') || 0);
   if (length > MAX_IMAGE_BYTES + 10_000)
@@ -87,11 +112,20 @@ export async function POST(request: NextRequest) {
       { status: 413 }
     );
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const mime = detectImage(bytes);
-  if (!mime || mime !== file.type)
+  const info = inspectImage(bytes);
+  if (!info || info.mime !== file.type)
     return NextResponse.json(
-      { error: 'Only genuine PNG, JPEG, or WebP images are supported.' },
+      {
+        error:
+          'Only well-formed PNG, JPEG, or WebP images up to 8000 px per side are supported.',
+      },
       { status: 415 }
+    );
+  const mime = info.mime;
+  if (!reserveSpend(access.costPerRequestUsd, access.dailyCapUsd))
+    return NextResponse.json(
+      { error: 'Daily analysis budget exhausted. Try again tomorrow.' },
+      { status: 503 }
     );
   const model = 'openai/gpt-4.1-mini';
   try {
