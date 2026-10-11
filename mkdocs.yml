@@ -38,6 +38,7 @@ nav:
   - AI Consensus: ai-consensus.md
   - API Reference: api-reference.md
   - Deployment: deployment.md
+  - Azure Preview Plan: azure-container-apps-plan.md
   - Contributing: contributing.md
 
 plugins:
