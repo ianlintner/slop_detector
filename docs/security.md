@@ -3,7 +3,8 @@
 The `/api/screenshot` route sends user-uploaded image bytes to a paid vision
 provider (OpenRouter, pinned to `openai/gpt-4.1-mini`). Because it spends money
 and forwards untrusted bytes, it is gated by three independent controls and
-fails closed when any of them is not configured.
+fails closed when the tokens or the spend cap are not configured (the rate
+limit has a default of 10/hour).
 
 ## Controls
 
@@ -18,8 +19,10 @@ fails closed when any of them is not configured.
 3. **Hard daily spend cap.** `SCREENSHOT_DAILY_SPEND_CAP_USD` bounds total
    provider spend per UTC day. The estimated per-request cost
    (`SCREENSHOT_ESTIMATED_COST_USD`, default 0.01) is _reserved before_ the
-   provider is called and is never refunded, so a failed or rejected request
-   still counts against the cap. This makes the cap a true ceiling.
+   provider is called and is never refunded, so a failed provider call still
+   counts. Requests rejected earlier (400/413/415) do not. The cap bounds
+   estimated spend (`SCREENSHOT_ESTIMATED_COST_USD`), not billed spend: set the
+   estimate at or above the worst-case per-request cost.
 
 State lives in process memory: rate-limit windows and the spend ledger reset on
 restart and are per-instance. If the endpoint is scaled to more than one
@@ -37,7 +40,7 @@ recovering real dimensions for PNG, JPEG, and WebP. This rejects:
 - images over 8000 px per side or 40 Mpx, which blocks decompression-bomb-sized
   canvases before any pixel decoding happens.
 
-Combined with the existing 5 MB byte cap, uploads are small, well-formed and
+Combined with the existing 5 MB byte cap, uploads are small, header-validated (dimensions only; pixels are never decoded) and
 known-dimensioned before they reach the provider.
 
 ## Prompt-injection hardening

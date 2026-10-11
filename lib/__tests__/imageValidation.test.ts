@@ -39,4 +39,79 @@ describe('inspectImage', () => {
   test('rejects unknown formats despite decoy extensions', () => {
     expect(inspectImage(Uint8Array.from([1, 2, 3, 4, 5]))).toBeNull();
   });
+
+  test('rejects a PNG whose signature tail is corrupted', () => {
+    const b = png(640, 480);
+    b[4] = 0x00; // corrupt one of the four signature tail bytes
+    expect(inspectImage(b)).toBeNull();
+  });
+
+  test('rejects a PNG whose IHDR length is not 13', () => {
+    const b = png(640, 480);
+    b[8] = 0;
+    b[9] = 0;
+    b[10] = 0;
+    b[11] = 5; // bogus 5-byte IHDR
+    expect(inspectImage(b)).toBeNull();
+  });
+
+  test('parses JPEG dimensions from the first SOF', () => {
+    const b = Uint8Array.from([
+      0xff,
+      0xd8,
+      0xff,
+      0xe0,
+      0x00,
+      0x07,
+      0x4a,
+      0x46,
+      0x49,
+      0x46,
+      0x00, // APP0 header
+      0xff,
+      0xc0,
+      0x00,
+      0x11, // SOF0, length 17
+      0x08,
+      0x02,
+      0x80,
+      0x01,
+      0xe0, // precision, height=640, width=480
+      0x03,
+      0x01,
+      0x11,
+      0x00,
+      0x02,
+      0x11,
+      0x01, // components
+    ]);
+    expect(inspectImage(b)).toEqual({
+      mime: 'image/jpeg',
+      width: 480,
+      height: 640,
+    });
+  });
+
+  test('rejects a JPEG that reaches scan start before any frame header', () => {
+    const b = Uint8Array.from([0xff, 0xd8, 0xff, 0xda, 0x00, 0x08]);
+    expect(inspectImage(b)).toBeNull();
+  });
+
+  test('parses WebP VP8X dimensions', () => {
+    const b = new Uint8Array(30);
+    b.set([0x52, 0x49, 0x46, 0x46], 0); // RIFF
+    b.set([0x57, 0x45, 0x42, 0x50], 8); // WEBP
+    b.set([0x56, 0x50, 0x38, 0x58], 12); // VP8X
+    b[24] = 639 & 0xff; // width-1 = 639 => width 640
+    b[25] = (639 >> 8) & 0xff;
+    b[26] = (639 >> 16) & 0xff;
+    b[27] = 479 & 0xff; // height-1 = 479 => height 480
+    b[28] = (479 >> 8) & 0xff;
+    b[29] = (479 >> 16) & 0xff;
+    expect(inspectImage(b)).toEqual({
+      mime: 'image/webp',
+      width: 640,
+      height: 480,
+    });
+  });
 });

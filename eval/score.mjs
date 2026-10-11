@@ -29,7 +29,35 @@ if (!fs.existsSync(resultsPath)) {
   process.exit(1);
 }
 
-const rows = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+const fixturesPath = path.join(path.dirname(resultsPath), 'fixtures.json');
+const fixtures = JSON.parse(fs.readFileSync(fixturesPath, 'utf8'));
+const SCOPES = new Set(['image', 'article', 'whole', 'auto']);
+const raw = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+if (!Array.isArray(raw)) {
+  console.error('results.json must be an array of prediction records.');
+  process.exit(1);
+}
+const byName = new Map(fixtures.map((f) => [f.name, f]));
+const seen = new Set();
+const problems = [];
+for (const r of raw) {
+  if (!byName.has(r.name)) problems.push('unknown fixture: ' + r.name);
+  if (seen.has(r.name)) problems.push('duplicate row: ' + r.name);
+  seen.add(r.name);
+  if (r.predicted_scope != null && !SCOPES.has(r.predicted_scope))
+    problems.push('invalid predicted_scope for ' + r.name);
+}
+for (const f of fixtures)
+  if (!seen.has(f.name)) problems.push('missing result: ' + f.name);
+if (problems.length) {
+  console.error(problems.join('\n'));
+  process.exit(1);
+}
+// Labels come from fixtures.json, never from the results file.
+const rows = raw.map((r) => {
+  const f = byName.get(r.name);
+  return { ...r, expected_scope: f.expected_scope, difficulty: f.difficulty };
+});
 
 const groups = new Map();
 for (const r of rows) {
@@ -54,7 +82,8 @@ function summarize(name, list) {
     name,
     n: total,
     precision: decided === 0 ? null : correct / decided,
-    recall: total === 0 ? null : correct / total,
+    // Recall counts a correct abstention as a correct outcome.
+    recall: total === 0 ? null : (correct + correctAbstention) / total,
     abstention: total === 0 ? null : abstained / total,
     correct_abstention: correctAbstention,
     unparseable,

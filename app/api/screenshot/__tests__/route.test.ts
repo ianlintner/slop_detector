@@ -46,6 +46,41 @@ test('requires a server key before accepting an upload', async () => {
   expect((await response.json()).error).toContain('OPENROUTER_API_KEY');
 });
 
+test('rejects unauthenticated requests with 401', async () => {
+  process.env.OPENROUTER_API_KEY = 'synthetic-test-key';
+  const upstream = jest.spyOn(global, 'fetch');
+  const form = new FormData();
+  form.set('image', new File([png], 'test.png', { type: 'image/png' }));
+  const response = await POST(
+    new NextRequest('http://localhost/api/screenshot', {
+      method: 'POST',
+      body: form,
+    })
+  );
+  expect(response.status).toBe(401);
+  expect(response.headers.get('WWW-Authenticate')).toBe('Bearer');
+  expect(upstream).not.toHaveBeenCalled();
+});
+
+test('rejects a mislabeled or malformed image with 415 and no provider call', async () => {
+  process.env.OPENROUTER_API_KEY = 'synthetic-test-key';
+  const upstream = jest.spyOn(global, 'fetch');
+  const form = new FormData();
+  form.set('image', new File([png], 'test.png', { type: 'image/jpeg' })); // MIME mismatch
+  form.set('scope', 'image');
+  form.set('context', 'synthetic image');
+  form.set('consent', 'yes');
+  const response = await POST(
+    new NextRequest('http://localhost/api/screenshot', {
+      method: 'POST',
+      body: form,
+      headers: { authorization: `Bearer ${TEST_TOKEN}` },
+    })
+  );
+  expect(response.status).toBe(415);
+  expect(upstream).not.toHaveBeenCalled();
+});
+
 test('enforces consent before calling the provider', async () => {
   process.env.OPENROUTER_API_KEY = 'synthetic-test-key';
   const upstream = jest.spyOn(global, 'fetch');

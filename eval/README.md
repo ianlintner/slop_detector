@@ -20,12 +20,13 @@ Do not fill predictions with invented values.
    contain private content) and label them in `fixtures.json`.
 2. Run each through the endpoint (needs owner-approved paid calls) and write
    `eval/results.json` using the shape in `results.example.json`
-   (`predicted_scope` is `image`, `article`, `whole-page`, `auto` or `null`
+   (`predicted_scope` is `image`, `article`, `whole`, `auto` or `null`
    for an unparseable response).
 3. `node eval/score.mjs` prints precision, recall and abstention overall and by
    difficulty group.
 
 Definitions: precision is correct committed answers over committed answers;
-recall is correct committed answers over all fixtures; abstention is the share
+recall is correct committed answers plus correct abstentions over all fixtures;
+abstention is the share
 of `auto` predictions, with `correct_abstention` counting those where `auto`
 was the expected label.

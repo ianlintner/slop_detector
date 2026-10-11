@@ -34,7 +34,10 @@ export function loadAccessConfig(env: Env): AccessConfig | string {
     const token = entry.slice(at + 1).trim();
     if (at < 1 || !/^[\w.-]{1,64}$/.test(id) || token.length < MIN_TOKEN_LENGTH)
       return `SCREENSHOT_ACCESS_TOKENS entries must be "user:token" with a token of at least ${MIN_TOKEN_LENGTH} characters.`;
-    users.push({ id, digest: digest(token) });
+    const d = digest(token);
+    if (users.some((u) => u.id === id || u.digest.equals(d)))
+      return 'SCREENSHOT_ACCESS_TOKENS must not repeat a user id or a token.';
+    users.push({ id, digest: d });
   }
   if (!users.length) return 'SCREENSHOT_ACCESS_TOKENS is not configured.';
   const dailyCapUsd = Number(env.SCREENSHOT_DAILY_SPEND_CAP_USD);
@@ -59,7 +62,7 @@ export function authenticate(
   header: string | null,
   config: AccessConfig
 ): string | null {
-  const match = /^Bearer (\S+)$/.exec(header || '');
+  const match = /^Bearer +(\S+)$/i.exec(header || '');
   if (!match) return null;
   const given = digest(match[1]);
   let found: string | null = null;

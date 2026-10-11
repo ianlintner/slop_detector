@@ -19,7 +19,8 @@ function ascii(b: Uint8Array, start: number, end: number) {
 }
 
 function pngSize(b: Uint8Array) {
-  if (b.length < 24 || ascii(b, 12, 16) !== 'IHDR') return null;
+  if (b.length < 24 || ascii(b, 12, 16) !== 'IHDR' || u32be(b, 8) !== 13)
+    return null;
   return { width: u32be(b, 16), height: u32be(b, 20) };
 }
 
@@ -88,7 +89,15 @@ function webpSize(b: Uint8Array) {
 export function inspectImage(bytes: Uint8Array): ImageInfo | null {
   let mime: string;
   let size: { width: number; height: number } | null;
-  if (bytes.length >= 8 && bytes[0] === 0x89 && ascii(bytes, 1, 4) === 'PNG') {
+  if (
+    bytes.length >= 8 &&
+    bytes[0] === 0x89 &&
+    ascii(bytes, 1, 4) === 'PNG' &&
+    bytes[4] === 0x0d &&
+    bytes[5] === 0x0a &&
+    bytes[6] === 0x1a &&
+    bytes[7] === 0x0a
+  ) {
     mime = 'image/png';
     size = pngSize(bytes);
   } else if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
