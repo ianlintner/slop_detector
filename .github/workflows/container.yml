@@ -1,0 +1,68 @@
+name: Container image
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  image-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build image without provider secrets
+        run: docker build --pull -t slop-ci:${{ github.sha }} .
+      - name: Exercise local container without paid egress
+        run: |
+          docker run -d --name slop-ci -p 127.0.0.1:3190:3000 \
+            -e OPENROUTER_API_KEY=synthetic-disabled \
+            -e SCREENSHOT_ACCESS_TOKENS=smoke:synthetic-token-12345678901234567890 \
+            -e SCREENSHOT_DAILY_SPEND_CAP_USD=0.01 \
+            slop-ci:${{ github.sha }}
+          node scripts/smoke-container.mjs
+      - name: Show container logs on failure
+        if: failure()
+        run: docker logs slop-ci || true
+      - name: Remove test container
+        if: always()
+        run: docker rm -f slop-ci || true
+
+  publish-image:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: image-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Authenticate to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build, smoke, and push the exact tested image
+        run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}:sha-${GITHUB_SHA}"
+          docker build --pull -t "$IMAGE" .
+          trap 'docker rm -f slop-publish >/dev/null 2>&1 || true' EXIT
+          docker run -d --name slop-publish -p 127.0.0.1:3190:3000 \
+            -e OPENROUTER_API_KEY=synthetic-disabled \
+            -e SCREENSHOT_ACCESS_TOKENS=smoke:synthetic-token-12345678901234567890 \
+            -e SCREENSHOT_DAILY_SPEND_CAP_USD=0.01 \
+            "$IMAGE"
+          node scripts/smoke-container.mjs
+          docker push "$IMAGE"
+          echo "Published $IMAGE (verified push digest in job output)"

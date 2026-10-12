@@ -1,0 +1,42 @@
+# Build context for the Slop Detector container image (see docs/deployment.md).
+# Goal: a small, reproducible context that can never carry local secrets or
+# build artifacts into a layer.
+
+# Secrets and local configuration
+# The example template is intentionally excluded too: no env file belongs in an image.
+.env
+.env.*
+*.pem
+*.key
+
+# Dependencies and build output (rebuilt inside the image with `npm ci`)
+node_modules
+/.next
+/out
+/build
+coverage
+
+# Version control and tooling caches
+.git
+.gitignore
+.github
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# Documentation, evaluation and requirements: not needed to run the server
+docs
+site
+eval
+mkdocs.yml
+requirements.txt
+
+# Container/ops files that should not enter the image
+Dockerfile
+Dockerfile.*
+.dockerignore
+docker-compose.yml
+
+# Editor and OS noise
+.DS_Store
+*.log

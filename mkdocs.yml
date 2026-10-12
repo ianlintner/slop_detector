@@ -39,6 +39,8 @@ nav:
   - API Reference: api-reference.md
   - Deployment: deployment.md
   - Azure Preview Plan: azure-container-apps-plan.md
+  - Screenshot MVP: screenshot-mvp.md
+  - Security: security.md
   - Contributing: contributing.md
 
 plugins:

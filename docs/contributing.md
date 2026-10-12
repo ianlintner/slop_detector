@@ -28,7 +28,7 @@ We are committed to providing a welcoming and inclusive environment for all cont
 
 ### Prerequisites
 
-- Node.js 18 or higher
+- Node.js 20.9 or higher
 - npm, yarn, pnpm, or bun
 - Git
 - A code editor (VS Code recommended)
