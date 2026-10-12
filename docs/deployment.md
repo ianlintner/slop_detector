@@ -1,5 +1,7 @@
 # Deployment Guide
 
+> **Security gate:** The routes include paid provider calls and are not ready for anonymous public traffic. Use the [restricted ACA plan](azure-container-apps-plan.md) and [security controls](security.md) before enabling external access. Examples below describe hosting mechanics, not an approval to deploy openly.
+
 Learn how to deploy Slop Detector to various platforms.
 
 ## Deployment Options
@@ -72,7 +74,7 @@ Vercel is the easiest and recommended way to deploy Slop Detector, as it's built
 
 ### Environment Variables
 
-No environment variables are required for basic functionality. If needed:
+The text-only demo can run without credentials. Screenshot analysis needs a server-only `OPENROUTER_API_KEY`, `SCREENSHOT_ACCESS_TOKENS`, and `SCREENSHOT_DAILY_SPEND_CAP_USD`; never use `NEXT_PUBLIC_` for secrets. See [Security](security.md) and the [restricted ACA plan](azure-container-apps-plan.md) before external exposure.
 
 1. Go to Project Settings → Environment Variables
 2. Add your variables
@@ -136,94 +138,29 @@ Create a `netlify.toml` file in your project root:
 
 ## Docker Deployment
 
-### Dockerfile
+The repository now contains a tested multi-stage [Dockerfile](https://github.com/ianlintner/slop_detector/blob/main/Dockerfile) and `.dockerignore`. `next.config.ts` emits a standalone server, and the runtime image includes static assets, runs as non-root, and expects keys **only at runtime**. Node 22 is pinned for the image; do not use the former Node 18 example with Next.js 16.
 
-Create a `Dockerfile` in your project root:
+### Local build and smoke
 
-```dockerfile
-# Build stage
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci
-
-COPY . .
-RUN npm run build
-
-# Production stage
-FROM node:18-alpine AS runner
-
-WORKDIR /app
-
-ENV NODE_ENV production
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
-
-EXPOSE 3000
-
-ENV PORT 3000
-
-CMD ["node", "server.js"]
-```
-
-### Docker Compose
-
-Create `docker-compose.yml`:
-
-```yaml
-version: '3.8'
-
-services:
-  slop-detector:
-    build: .
-    ports:
-      - '3000:3000'
-    environment:
-      - NODE_ENV=production
-    restart: unless-stopped
-```
-
-### Build and Run
+Build from the repository root with Docker or Podman. Bind the preview to loopback and use **synthetic-only** credentials; do not give this local image a real provider key unless performing a separately authorized smoke.
 
 ```bash
-# Build image
-docker build -t slop-detector .
-
-# Run container
-docker run -p 3000:3000 slop-detector
-
-# Or with Docker Compose
-docker-compose up -d
+podman build -t slop-detector:local .
+podman run --rm --name slop-detector-local -p 127.0.0.1:3190:3000 \
+  -e OPENROUTER_API_KEY=synthetic-disabled \
+  -e SCREENSHOT_ACCESS_TOKENS=smoke:synthetic-token-12345678901234567890 \
+  -e SCREENSHOT_DAILY_SPEND_CAP_USD=0.01 slop-detector:local
 ```
 
-### Update next.config.ts for Docker
+In another shell, verify `GET /api/health` and `/` return 200, static assets under `/_next/static/` return 200, and a POST to `/api/screenshot` without a bearer token returns 401. A tokened malformed image should return 415 without calling OpenRouter. Do not pass a real image to the synthetic key.
 
-For standalone output (recommended for Docker):
-
-```typescript
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
-  output: 'standalone',
-};
-
-export default nextConfig;
-```
+This is **packaging**, not a public deployment. The `Container image` workflow builds and smoke-tests this Dockerfile on PRs, then publishes `ghcr.io/ianlintner/slop_detector:sha-<full-main-commit>` only after a merge to `main`; no `latest` tag is published. Verify its actual GHCR push job and digest before deploying that exact image. The in-memory limits reset across restarts and are not a durable spend cap. Before external ingress, follow the [restricted ACA plan](azure-container-apps-plan.md): dedicated provider-limited key, full-app Entra authentication, secrets via Key Vault identity, scale 0–1, and an explicit staging verification/rollback gate. The existing `/api/ai-analyze` and `/api/youtube` routes also need the preview access gate. A Container Apps health probe can target `/api/health` without exposing provider state.
 
 ## Self-Hosted Deployment
 
 ### Requirements
 
-- Node.js 18 or higher
+- Node.js 20.9 or higher
 - npm or yarn
 - Process manager (PM2, systemd, etc.)
 - Reverse proxy (Nginx, Apache, etc.)
@@ -432,14 +369,7 @@ sudo systemctl status slop-detector
 
 ### Health Checks
 
-Create a health check endpoint:
-
-```typescript
-// app/api/health/route.ts
-export async function GET() {
-  return Response.json({ status: 'ok', timestamp: new Date().toISOString() });
-}
-```
+The real `app/api/health/route.ts` returns `{ "status": "ok" }` with `Cache-Control: no-store`; it is a process readiness check, not proof that OpenRouter or authentication is configured. The container `HEALTHCHECK` and ACA HTTP probe use this route.
 
 ### Logging
 
