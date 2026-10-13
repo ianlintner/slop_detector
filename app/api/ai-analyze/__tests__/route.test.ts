@@ -195,4 +195,28 @@ describe('provider failure privacy', () => {
     expect(auth).toContain('server-side-key');
     expect(JSON.stringify(fetchSpy.mock.calls)).not.toContain('attacker-key');
   });
+
+  test('omitted includeInternal keeps the blended default score', async () => {
+    const send = async (config: Record<string, unknown>) =>
+      (
+        await (
+          await POST(
+            req({
+              content: 'a short clean sentence',
+              config: { useAI: true, providers: [{ name: 'mock' }], ...config },
+            })
+          )
+        ).json()
+      ).analysis;
+    const omitted = await send({});
+    const explicitTrue = await send({ includeInternal: true });
+    const explicitFalse = await send({ includeInternal: false });
+    expect(omitted.finalScore).toBe(explicitTrue.finalScore);
+    expect(explicitFalse.finalScore).toBe(
+      explicitFalse.aiConsensus.consensusScore
+    );
+    expect(omitted.finalScore).toBe(
+      Math.round(omitted.score * 0.5 + omitted.aiConsensus.consensusScore * 0.5)
+    );
+  });
 });
