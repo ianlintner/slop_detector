@@ -5,6 +5,7 @@
  */
 
 import { SlopAnalysis } from './slopDetector';
+import { errorClass } from './safeError';
 
 export interface AIProvider {
   name: string;
@@ -156,10 +157,7 @@ export async function performAIConsensus(
     } else {
       // Log error without using user-controlled provider name in format string
       console.error('Failed to analyze with AI provider:', {
-        error:
-          result.reason instanceof Error
-            ? result.reason.message
-            : 'Unknown error',
+        error: errorClass(result.reason),
         providerNameLength: result.providerName.length,
       });
       // Continue with other providers even if one fails

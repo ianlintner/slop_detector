@@ -28,3 +28,53 @@ Open one feature PR per gate, with CI plus independent exact-head review; reques
 - [Container Apps built-in Entra authentication](https://learn.microsoft.com/en-us/azure/container-apps/authentication-entra)
 - [Next.js standalone output](https://nextjs.org/docs/app/api-reference/config/next-config-js/output)
 - [OpenRouter API-key spending limits](https://openrouter.ai/docs/api/api-reference/api-keys/create-keys)
+
+## Restricted preview: auth and spend specification (not applied)
+
+This section specifies, without provisioning, the preview access and spend
+controls for the legacy analysis routes (`/api/ai-analyze`, `/api/youtube`)
+and `/api/screenshot`. It is a written target for Gate 3 (#22), not a deployed
+configuration; nothing here is applied until that gate's owner-approved PR.
+
+### Application-level gate (`lib/previewGate.ts`)
+
+When `RESTRICTED_PREVIEW` is `1` or `true`, the gated routes require
+`X-MS-CLIENT-PRINCIPAL-ID` (injected by ACA built-in Entra auth after sign-in)
+and answer `401 Authentication required.` otherwise. When the flag is unset,
+the routes behave as before for local development. The header is a defense-in-
+depth confirmation only: it is authoritative solely because the platform gate
+below overwrites it and rejects unauthenticated traffic.
+
+### ACA built-in Entra authentication (specification)
+
+- Enable the Container App's built-in Authentication (Microsoft identity
+  provider) with **allow unauthenticated access disabled** and unauthenticated
+  requests **rejected before reaching the app**.
+- Restrict access to an explicit list of tester identities (owner-decided:
+  the allowed principals/group and any token lifetime are not chosen here).
+- Confirm `X-MS-CLIENT-PRINCIPAL-ID` is reset by the platform for every
+  request, so the application-layer check cannot be spoofed by a client
+  header.
+
+### Dedicated OpenRouter key and Key Vault binding (specification)
+
+- Use a dedicated OpenRouter key, never the shared Hermes key. The key's
+  provider-enforced spending limit (owner-decided value) is the emergency
+  bound; the app's in-memory counters are advisory only.
+- Store the key as a Secret in the existing Key Vault and bind it to the app
+  via the Container App's secret reference (managed identity), so the key
+  never appears in revision secrets, env, images or IaC source.
+- Keep analytic numeric limits and the allowed-tester identity as owner
+  decisions; the code and this spec deliberately do not guess them.
+
+### Route hardening shipped in this slice
+
+- Bounded JSON bodies (256 KiB default; `CONTENT`/`URL` length limits),
+  oversized-body rejection before any upstream call, and provider-name/
+  provider-count validation on the AI route.
+- Caller-supplied provider `apiKey`/`endpoint` are stripped; only
+  server-configured keys are used.
+- Error responses are generic (no `details`) and logs record only error
+  classes, so provider messages that echo request content are not returned or
+  persisted. The YouTube transcript response is truncated to the AI-route
+  limit.
