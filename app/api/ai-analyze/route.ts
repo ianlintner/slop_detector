@@ -115,7 +115,13 @@ export async function POST(request: NextRequest) {
     }
     const aiConfig: AIConsensusConfig = {
       ...DEFAULT_AI_CONFIG,
-      ...normalizedConfig,
+      includeInternal: normalizedConfig.includeInternal === true,
+      providers: Array.isArray(normalizedConfig.providers)
+        ? (normalizedConfig.providers as { name: string }[])
+        : DEFAULT_AI_CONFIG.providers,
+      ...(normalizedConfig.weights
+        ? { weights: normalizedConfig.weights }
+        : {}),
     };
 
     try {

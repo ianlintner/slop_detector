@@ -166,15 +166,19 @@ describe('provider failure privacy', () => {
     expect(logged()).not.toContain(SECRET);
   });
 
-  test('unexpected internal error returns generic 500 without details', async () => {
-    const res = await POST(
-      req({ content: SECRET, config: { useAI: true, weights: 5 } })
-    );
-    // Non-object weights are dropped, request still succeeds without leaking.
-    expect(JSON.stringify(await res.json())).not.toContain(SECRET);
+  test('invalid provider names are rejected with 400 and no upstream call', async () => {
+    for (const name of [123, null, 'x'.repeat(33)]) {
+      const res = await POST(
+        req({ content: SECRET, config: { useAI: true, providers: [{ name }] } })
+      );
+      expect(res.status).toBe(400);
+      expect(JSON.stringify(await res.json())).not.toContain(SECRET);
+    }
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  test('caller-supplied provider apiKey is stripped', async () => {
+  test('caller-supplied provider apiKey is ignored in favor of the server key', async () => {
+    process.env.OPENAI_API_KEY = 'server-side-key';
     fetchSpy.mockRejectedValue(new Error('boom'));
     await POST(
       req({
@@ -185,7 +189,10 @@ describe('provider failure privacy', () => {
         },
       })
     );
-    // No server key configured and caller key ignored: no upstream call made.
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const options = fetchSpy.mock.calls[0][1] as RequestInit;
+    const auth = (options.headers as Record<string, string>).Authorization;
+    expect(auth).toContain('server-side-key');
+    expect(JSON.stringify(fetchSpy.mock.calls)).not.toContain('attacker-key');
   });
 });
