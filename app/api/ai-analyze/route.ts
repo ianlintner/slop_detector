@@ -6,14 +6,65 @@ import {
   AIConsensusConfig,
   DEFAULT_AI_CONFIG,
 } from '@/lib/aiConsensus';
+import {
+  MAX_CONTENT_CHARS,
+  MAX_PROVIDERS,
+  previewGateDenied,
+  readBoundedJson,
+} from '@/lib/previewGate';
+import { errorClass } from '@/lib/safeError';
+
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
+  const denied = previewGateDenied(request);
+  if (denied) return denied;
   try {
-    const { content, config } = await request.json();
+    const body = await readBoundedJson(request);
+    if (!body.ok) return body.response;
+    const { content, config } = (body.value ?? {}) as {
+      content?: unknown;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      config?: any;
+    };
 
     if (typeof content !== 'string' || content.trim().length === 0) {
       return NextResponse.json(
         { error: 'Content must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+    if (content.length > MAX_CONTENT_CHARS) {
+      return NextResponse.json(
+        { error: `Content exceeds ${MAX_CONTENT_CHARS} characters.` },
+        { status: 413 }
+      );
+    }
+    if (
+      config !== undefined &&
+      (config === null || typeof config !== 'object' || Array.isArray(config))
+    ) {
+      return NextResponse.json(
+        { error: 'config must be an object' },
+        { status: 400 }
+      );
+    }
+    if (
+      config?.providers !== undefined &&
+      (!Array.isArray(config.providers) ||
+        config.providers.length > MAX_PROVIDERS ||
+        config.providers.some(
+          (p: unknown) =>
+            !p ||
+            typeof p !== 'object' ||
+            typeof (p as { name?: unknown }).name !== 'string' ||
+            (p as { name: string }).name.length > 32
+        ))
+    ) {
+      return NextResponse.json(
+        {
+          error: `providers must list at most ${MAX_PROVIDERS} named providers`,
+        },
         { status: 400 }
       );
     }
@@ -35,6 +86,17 @@ export async function POST(request: NextRequest) {
     // Perform AI consensus analysis
     // Validate and normalize weights if present in config
     const normalizedConfig = { ...config };
+    // Callers may not supply provider credentials; servers use their own keys.
+    if (Array.isArray(normalizedConfig.providers))
+      normalizedConfig.providers = normalizedConfig.providers.map(
+        (p: { name: string }) => ({ name: p.name })
+      );
+    if (
+      normalizedConfig.weights &&
+      typeof normalizedConfig.weights === 'object'
+    )
+      normalizedConfig.weights = { ...normalizedConfig.weights };
+    else delete normalizedConfig.weights;
     if (normalizedConfig.weights) {
       let internal = Number(normalizedConfig.weights.internal);
       let ai = Number(normalizedConfig.weights.ai);
@@ -53,7 +115,16 @@ export async function POST(request: NextRequest) {
     }
     const aiConfig: AIConsensusConfig = {
       ...DEFAULT_AI_CONFIG,
-      ...normalizedConfig,
+      includeInternal:
+        typeof normalizedConfig.includeInternal === 'boolean'
+          ? normalizedConfig.includeInternal
+          : DEFAULT_AI_CONFIG.includeInternal,
+      providers: Array.isArray(normalizedConfig.providers)
+        ? (normalizedConfig.providers as { name: string }[])
+        : DEFAULT_AI_CONFIG.providers,
+      ...(normalizedConfig.weights
+        ? { weights: normalizedConfig.weights }
+        : {}),
     };
 
     try {
@@ -70,30 +141,29 @@ export async function POST(request: NextRequest) {
       });
     } catch (aiError) {
       // If AI analysis fails, return internal analysis with error info
-      console.error('AI consensus analysis failed:', aiError);
+      // Log only the error class: provider errors can echo request content.
+      console.error('AI consensus analysis failed:', errorClass(aiError));
 
       return NextResponse.json({
         success: true,
         analysis: internalAnalysis,
         warning:
           'AI consensus analysis not available. Showing internal analysis only.',
-        aiError:
-          aiError instanceof Error ? aiError.message : 'Unknown AI error',
+        aiError: 'AI provider unavailable',
       });
     }
   } catch (error) {
-    console.error('Error in AI analyze endpoint:', error);
+    console.error('Error in AI analyze endpoint:', errorClass(error));
     return NextResponse.json(
-      {
-        error: 'Failed to analyze content',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: 'Failed to analyze content' },
       { status: 500 }
     );
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const denied = previewGateDenied(request);
+  if (denied) return denied;
   return NextResponse.json({
     info: 'AI-powered slop analysis endpoint',
     usage: {

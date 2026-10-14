@@ -36,7 +36,24 @@ afterEach(() => {
   else process.env.OPENROUTER_API_KEY = originalKey;
   delete process.env.SCREENSHOT_ACCESS_TOKENS;
   delete process.env.SCREENSHOT_DAILY_SPEND_CAP_USD;
+  delete process.env.RESTRICTED_PREVIEW;
   jest.restoreAllMocks();
+});
+
+test('requires the platform identity when the preview gate is on', async () => {
+  process.env.RESTRICTED_PREVIEW = '1';
+  process.env.OPENROUTER_API_KEY = 'synthetic-test-key';
+  const upstream = jest.spyOn(global, 'fetch');
+  const response = await POST(
+    new NextRequest('http://localhost/api/screenshot', {
+      method: 'POST',
+      body: new FormData(),
+      headers: { authorization: `Bearer ${TEST_TOKEN}` },
+    })
+  );
+  expect(response.status).toBe(401);
+  expect(response.headers.get('WWW-Authenticate')).toBeNull();
+  expect(upstream).not.toHaveBeenCalled();
 });
 
 test('requires a server key before accepting an upload', async () => {

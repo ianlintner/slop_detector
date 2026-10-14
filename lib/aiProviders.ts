@@ -9,6 +9,7 @@ import {
   AIAnalysisResult,
   createSlopAnalysisPrompt,
 } from './aiConsensus';
+import { errorClass } from './safeError';
 
 /**
  * OpenAI Provider Implementation (Example)
@@ -89,7 +90,7 @@ export async function analyzeWithOpenAI(
       factors: aiResponse.factors,
     };
   } catch (error) {
-    console.error('OpenAI analysis error:', error);
+    console.error('OpenAI analysis error:', errorClass(error));
     throw error;
   }
 }
@@ -177,7 +178,7 @@ export async function analyzeWithAnthropic(
       factors: aiResponse.factors,
     };
   } catch (error) {
-    console.error('Anthropic analysis error:', error);
+    console.error('Anthropic analysis error:', errorClass(error));
     throw error;
   }
 }

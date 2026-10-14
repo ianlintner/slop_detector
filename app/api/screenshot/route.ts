@@ -5,6 +5,7 @@ import {
   loadAccessConfig,
   reserveSpend,
 } from '@/lib/accessControl';
+import { previewGateDenied } from '@/lib/previewGate';
 import { inspectImage } from '@/lib/imageValidation';
 import {
   makePrompt,
@@ -18,6 +19,8 @@ export const runtime = 'nodejs';
 const scopes: Scope[] = ['auto', 'image', 'article', 'whole'];
 
 export async function POST(request: NextRequest) {
+  const denied = previewGateDenied(request);
+  if (denied) return denied;
   const key = process.env.OPENROUTER_API_KEY;
   if (!key)
     return NextResponse.json(
