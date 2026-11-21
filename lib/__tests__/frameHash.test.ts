@@ -72,3 +72,13 @@ describe('FrameDedupe', () => {
     expect(d.isDuplicate(BigInt(2))).toBe(false);
   });
 });
+
+describe('FrameDedupe.match', () => {
+  test('returns the index of the original unique frame, else -1', () => {
+    const d = new FrameDedupe(0);
+    expect(d.match(BigInt(1))).toBe(-1);
+    expect(d.match(BigInt(2))).toBe(-1);
+    expect(d.match(BigInt(2))).toBe(1);
+    expect(d.match(BigInt(1))).toBe(0);
+  });
+});

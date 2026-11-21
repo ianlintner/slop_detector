@@ -1,4 +1,11 @@
-import { parseLabels, scorePredictions } from '../frameEval';
+import path from 'node:path';
+import {
+  parseLabels,
+  parseThreshold,
+  resolveCliPath,
+  resolveFramePath,
+  scorePredictions,
+} from '../frameEval';
 import type { Prediction } from '../frameEval';
 
 describe('parseLabels', () => {
@@ -95,5 +102,24 @@ describe('scorePredictions', () => {
     expect(m.avg_latency_ms).toBe(200);
     expect(m.total_cost_usd).toBeCloseTo(1.0);
     expect(m.per_frame_cost_usd).toBeCloseTo(0.5);
+  });
+});
+
+describe('path and threshold validation', () => {
+  test('resolveCliPath is cwd-relative', () => {
+    expect(resolveCliPath('eval/labels.csv')).toBe(
+      path.join(process.cwd(), 'eval/labels.csv')
+    );
+  });
+  test('parseThreshold validates', () => {
+    expect(parseThreshold('10')).toBe(10);
+    expect(() => parseThreshold(undefined)).toThrow();
+    expect(() => parseThreshold('x')).toThrow();
+    expect(() => parseThreshold('-1')).toThrow();
+  });
+  test('resolveFramePath enforces containment', () => {
+    expect(resolveFramePath('/data/f', 'a/b.png')).toBe('/data/f/a/b.png');
+    expect(() => resolveFramePath('/data/f', '../x.png')).toThrow();
+    expect(() => resolveFramePath('/data/f', '/etc/x.png')).toThrow();
   });
 });

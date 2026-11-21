@@ -11,12 +11,51 @@
  * calibration image) but still hashed and reported for dedupe transparency.
  *
  * Prediction records pair each labeled file with a provider verdict plus
- * latency and cost; scoring computes precision, recall (counting a correct
- * abstention as correct, matching the screenshot eval convention), abstain
- * rate, unparseable rate, per-frame latency and cost.
+ * latency and cost; scoring computes precision, recall, abstain rate,
+ * unparseable rate, per-frame latency and cost. Frame labels are binary, so an
+ * abstention (`uncertain`) is a non-answer: it is never counted as correct and
+ * lowers recall (unlike the screenshot eval, whose `auto` scope can be expected).
  */
 
+import path from 'node:path';
+
 import type { Verdict } from './screenshotScope.ts';
+
+/** Resolve a CLI path against the current working directory. */
+export function resolveCliPath(p: string): string {
+  return path.resolve(process.cwd(), p);
+}
+
+/** Parse a dedupe threshold (Hamming bits, integer 0-64); throws if invalid. */
+export function parseThreshold(raw: string | undefined): number {
+  const n = raw === undefined || raw.trim() === '' ? NaN : Number(raw);
+  if (!Number.isInteger(n) || n < 0 || n > 64)
+    throw new Error(
+      `--threshold requires an integer between 0 and 64, got '${raw ?? ''}'`
+    );
+  return n;
+}
+
+/**
+ * Resolve a CSV `file` entry inside the frames directory, rejecting absolute
+ * paths and anything that escapes it (so a labels CSV cannot point the harness
+ * at arbitrary local images to send to a remote provider).
+ */
+export function resolveFramePath(dir: string, file: string): string {
+  const root = path.resolve(dir);
+  const full = path.resolve(root, file);
+  const rel = path.relative(root, full);
+  if (
+    path.isAbsolute(file) ||
+    rel === '' ||
+    rel.startsWith('..') ||
+    path.isAbsolute(rel)
+  )
+    throw new Error(
+      `Frame path '${file}' must stay inside the frames directory`
+    );
+  return full;
+}
 
 export type Label = 'slop' | 'not_slop' | 'skip';
 export type LabeledFrame = {

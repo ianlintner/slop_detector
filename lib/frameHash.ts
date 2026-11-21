@@ -99,12 +99,20 @@ export class FrameDedupe {
     this.threshold = threshold;
   }
 
-  isDuplicate(hash: bigint): boolean {
-    for (const prior of this.seen) {
-      if (hamming(hash, prior) <= this.threshold) return true;
+  /**
+   * Returns the index (registration order) of the earlier unique frame this
+   * hash duplicates, or -1 (and registers the hash) if it is new.
+   */
+  match(hash: bigint): number {
+    for (let i = 0; i < this.seen.length; i++) {
+      if (hamming(hash, this.seen[i]) <= this.threshold) return i;
     }
     this.seen.push(hash);
-    return false;
+    return -1;
+  }
+
+  isDuplicate(hash: bigint): boolean {
+    return this.match(hash) >= 0;
   }
 
   get count(): number {

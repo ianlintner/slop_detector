@@ -22,16 +22,18 @@
  * Node 22.6+ runs this file directly via native type-stripping; no build step.
  */
 import { readFile } from 'node:fs/promises';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { ahashFromRaster, contentHash, FrameDedupe } from '../lib/frameHash.ts';
 import type { FrameAssessment } from '../lib/frameProviders.ts';
 import type { FrameProvider } from '../lib/frameProviders.ts';
 import { resolveProvider } from '../lib/frameProviderImpls.ts';
-import { parseLabels, scorePredictions } from '../lib/frameEval.ts';
+import {
+  parseLabels,
+  parseThreshold,
+  resolveCliPath,
+  resolveFramePath,
+  scorePredictions,
+} from '../lib/frameEval.ts';
 import type { Prediction, LabeledFrame } from '../lib/frameEval.ts';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 type Args = {
   dir: string;
@@ -39,6 +41,7 @@ type Args = {
   provider: string;
   threshold: number;
   json: boolean;
+  allowContentHash: boolean;
 };
 
 function parseArgs(argv: string[]): Args {
@@ -48,6 +51,7 @@ function parseArgs(argv: string[]): Args {
     provider: 'mock',
     threshold: 10,
     json: false,
+    allowContentHash: false,
   };
   for (let i = 2; i < argv.length; i++) {
     const flag = argv[i];
@@ -55,11 +59,18 @@ function parseArgs(argv: string[]): Args {
     if (flag === '--dir') a.dir = val;
     else if (flag === '--labels') a.labels = val;
     else if (flag === '--provider') a.provider = val;
-    else if (flag === '--threshold') a.threshold = Number(val);
-    else if (flag === '--json') a.json = true;
+    else if (flag === '--threshold') {
+      try {
+        a.threshold = parseThreshold(val);
+      } catch (e) {
+        console.error(e instanceof Error ? e.message : String(e));
+        process.exit(2);
+      }
+    } else if (flag === '--json') a.json = true;
+    else if (flag === '--allow-content-hash') a.allowContentHash = true;
     else if (flag === '--help') {
       console.log(
-        'Usage: node eval/run.ts --dir <frames-dir> --labels <labels.csv> [--provider mock|openrouter|azure|local] [--threshold <bits>] [--json]'
+        'Usage: node eval/run.ts --dir <frames-dir> --labels <labels.csv> [--provider mock|openrouter|azure|local] [--threshold <bits>] [--json] [--allow-content-hash]'
       );
       process.exit(0);
     }
@@ -97,34 +108,49 @@ function detectMime(bytes: Uint8Array): string | null {
   return null;
 }
 
-/** Decode image bytes to a flat RGBA raster using sharp (lazy-loaded). */
-async function decodeRaster(
-  bytes: Uint8Array
-): Promise<{ raster: Uint8Array; channels: number } | null> {
+/** Load sharp, failing loudly: a content hash has no perceptual meaning. */
+async function loadSharp(allowContentHash: boolean) {
   try {
-    const sharp = (await import('sharp')).default;
-    const { data, info } = await sharp(bytes)
-      .resize(32, 32, { fit: 'fill' })
-      .removeAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-    return { raster: new Uint8Array(data), channels: info.channels };
-  } catch {
-    return null; // undecodable — fall through to content hash
+    return (await import('sharp')).default;
+  } catch (e) {
+    if (!allowContentHash) {
+      console.error(
+        `sharp failed to load (${e instanceof Error ? e.message : String(e)}). ` +
+          'Perceptual de-duplication needs it; install dependencies, or pass ' +
+          '--allow-content-hash to fall back to exact-duplicate detection only.'
+      );
+      process.exit(2);
+    }
+    console.error(
+      'WARNING: sharp unavailable; using exact content hash. The --threshold ' +
+        'Hamming distance has no perceptual meaning in this mode.'
+    );
+    return null;
   }
 }
 
-async function hashForPath(filePath: string): Promise<bigint> {
-  const bytes = new Uint8Array(await readFile(filePath));
-  const dec = await decodeRaster(bytes);
-  if (dec) return ahashFromRaster(dec.raster, 32, 32, dec.channels);
+type Sharp = NonNullable<Awaited<ReturnType<typeof loadSharp>>>;
+
+async function hashBytes(bytes: Uint8Array, sharp: Sharp | null) {
+  if (sharp) {
+    try {
+      const { data, info } = await sharp(bytes)
+        .resize(32, 32, { fit: 'fill' })
+        .removeAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      return ahashFromRaster(new Uint8Array(data), 32, 32, info.channels);
+    } catch {
+      // undecodable — fall through to content hash
+    }
+  }
   return contentHash(bytes);
 }
 
 async function main() {
   const args = parseArgs(process.argv);
-  const labelsPath = path.resolve(__dirname, args.labels);
-  const dirPath = path.resolve(__dirname, args.dir);
+  const labelsPath = resolveCliPath(args.labels);
+  const dirPath = resolveCliPath(args.dir);
 
   const csvText = await readFile(labelsPath, 'utf8');
   const frames: LabeledFrame[] = parseLabels(csvText);
@@ -137,14 +163,17 @@ async function main() {
     process.exit(2);
   }
 
+  const sharp = await loadSharp(args.allowContentHash);
   const dedupe = new FrameDedupe(args.threshold);
   const predictions: Prediction[] = [];
+  // Prediction for each unique (first-seen) frame, in dedupe registration order.
+  const uniquePreds: Prediction[] = [];
 
   for (const frame of frames) {
-    const filePath = path.resolve(dirPath, frame.file);
     let bytes: Uint8Array;
     let mime: string | null;
     try {
+      const filePath = resolveFramePath(dirPath, frame.file);
       bytes = new Uint8Array(await readFile(filePath));
       mime = detectMime(bytes);
     } catch {
@@ -155,7 +184,7 @@ async function main() {
         latencyMs: -1,
         costUsd: 0,
         provider: provider.name,
-        reason: 'file missing or unreadable',
+        reason: 'file missing, unreadable or outside frames dir',
       });
       continue;
     }
@@ -172,9 +201,9 @@ async function main() {
       continue;
     }
 
-    const hash = await hashForPath(filePath);
-    const isDup = dedupe.isDuplicate(hash);
     if (frame.label === 'skip') {
+      // Skipped frames are excluded from scoring and must not enter the
+      // dedupe set (a calibration frame must not suppress a later labeled one).
       predictions.push({
         file: frame.file,
         verdict: null,
@@ -182,36 +211,53 @@ async function main() {
         latencyMs: 0,
         costUsd: 0,
         provider: provider.name,
-        duplicate: isDup,
         reason: 'skip',
       });
       continue;
     }
-    if (isDup) {
-      // De-duplicated: skip the provider call, record the decision cost as zero.
+
+    const origIdx = dedupe.match(await hashBytes(bytes, sharp));
+    if (origIdx >= 0) {
+      // De-duplicated: no provider call; inherit the original frame's verdict
+      // so the cost lever does not distort precision/recall.
+      const orig = uniquePreds[origIdx];
       predictions.push({
         file: frame.file,
-        verdict: null,
+        verdict: orig.verdict,
         label: frame.label,
         latencyMs: 0,
         costUsd: 0,
         provider: provider.name,
+        model: orig.model,
         duplicate: true,
-        reason: 'duplicate (pHash) — skipped provider call',
+        reason: `duplicate of ${orig.file} — skipped provider call`,
       });
       continue;
     }
+    // Reserve this unique slot; filled in below by whichever path pushes.
+    const slot = uniquePreds.length;
+    uniquePreds.push(undefined as unknown as Prediction);
 
     const t0 = performance.now();
-    let assessment: FrameAssessment;
+    let pred: Prediction;
     try {
-      assessment = await provider.assess(
+      const assessment: FrameAssessment = await provider.assess(
         bytes,
         mime,
         `${frame.scope} ${frame.notes}`.trim()
       );
+      pred = {
+        file: frame.file,
+        verdict: assessment.verdict,
+        label: frame.label,
+        latencyMs: performance.now() - t0,
+        costUsd: assessment.costUsd ?? 0,
+        provider: provider.name,
+        model: assessment.model,
+        reason: assessment.reason,
+      };
     } catch (e) {
-      predictions.push({
+      pred = {
         file: frame.file,
         verdict: null,
         label: frame.label,
@@ -219,19 +265,10 @@ async function main() {
         costUsd: 0,
         provider: provider.name,
         reason: e instanceof Error ? e.message : String(e),
-      });
-      continue;
+      };
     }
-    predictions.push({
-      file: frame.file,
-      verdict: assessment.verdict,
-      label: frame.label,
-      latencyMs: performance.now() - t0,
-      costUsd: assessment.costUsd ?? 0,
-      provider: provider.name,
-      model: assessment.model,
-      reason: assessment.reason,
-    });
+    predictions.push(pred);
+    uniquePreds[slot] = pred;
   }
 
   const metrics = scorePredictions(

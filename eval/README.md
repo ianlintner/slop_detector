@@ -45,6 +45,7 @@ node eval/run.ts --dir <frames-dir> --labels <labels.csv> \
   `label ∈ slop|not_slop|skip`).
 - De-duplicates near-identical frames by perceptual hash before any provider
   call (the main cost lever for a repeating video feed).
+- Paths are relative to the current directory; CSV `file` entries must stay inside `--dir`. Duplicates inherit the original frame's verdict; `skip` frames never enter the dedupe set. `--threshold` must be an integer 0–64. If `sharp` fails to load the run aborts unless `--allow-content-hash` (exact-duplicate detection only) is given.
 - Defaults to `mock` (no network, no key); real providers (`openrouter`,
   `azure`, `local`) fail closed without credentials.
 - Reports precision, recall, abstain rate, latency and estimated cost.
