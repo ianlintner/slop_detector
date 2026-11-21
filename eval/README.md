@@ -30,3 +30,28 @@ recall is correct committed answers plus correct abstentions over all fixtures;
 abstention is the share
 of `auto` predictions, with `correct_abstention` counting those where `auto`
 was the expected label.
+
+## Frame evaluation harness (streaming frames)
+
+A second harness assesses still frames/thumbnails (for the Converge streaming
+spike) rather than full screenshots. It lives alongside this one:
+
+```text
+node eval/run.ts --dir <frames-dir> --labels <labels.csv> \
+  [--provider mock|openrouter|azure|local] [--threshold <bits>] [--json]
+```
+
+- Inputs a directory of images plus a labels CSV (`file,label,scope,notes` with
+  `label ∈ slop|not_slop|skip`).
+- De-duplicates near-identical frames by perceptual hash before any provider
+  call (the main cost lever for a repeating video feed).
+- Paths are relative to the current directory; CSV `file` entries must stay inside `--dir`. Duplicates inherit the original frame's verdict; `skip` frames never enter the dedupe set. `--threshold` must be an integer 0–64. If `sharp` fails to load the run aborts unless `--allow-content-hash` (exact-duplicate detection only) is given.
+- Defaults to `mock` (no network, no key); real providers (`openrouter`,
+  `azure`, `local`) fail closed without credentials.
+- Reports precision, recall, abstain rate, latency and estimated cost.
+
+Full details, the provider/privacy model, and the current (unmeasured) status are
+in `docs/frame-eval-harness.md`. Note: frame labels are binary, so an
+`uncertain` verdict is scored as a non-answer (lowering recall coverage) rather
+than as a "correct abstention" — unlike the scope harness above, whose
+`expected_scope` can be `auto`.
